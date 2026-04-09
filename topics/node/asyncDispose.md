@@ -12,3 +12,8 @@ export async function browserContext(logger: ILogger): Promise<BrowserContext & 
   };
 }
 ```
+
+tsconfig.json
+```
+    "lib": ["ES2022", "esnext.disposable"],
+```
