@@ -7,13 +7,11 @@ from vault_fm.errors import EncodingError, ParseError, ValidationError
 from vault_fm.gitutil import git_add, git_repo_root, list_staged_all_md
 from vault_fm.links import list_tracked_files_set, validate_in_scope_notes
 from vault_fm.paths import is_in_scope
-from vault_fm.version import require_python
 
 
 def main(argv: list[str] | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     _ = argv
-    require_python()
     try:
         root = git_repo_root()
     except RuntimeError as e:

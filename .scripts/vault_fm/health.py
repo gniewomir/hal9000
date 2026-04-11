@@ -15,7 +15,6 @@ from vault_fm.io import (
     split_front_matter,
 )
 from vault_fm.parse import parse_fm_inner, rebuild_fm_canonical
-from vault_fm.version import require_python
 
 
 def _load_parsed(repo_root: Path, rel: str):
@@ -174,7 +173,6 @@ def fix_vault(repo_root: Path) -> None:
 def main(argv: list[str] | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     fix = "--fix" in argv
-    require_python()
     try:
         root = git_repo_root()
     except RuntimeError as e:

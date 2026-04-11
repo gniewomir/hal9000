@@ -19,8 +19,20 @@ def git_repo_root(cwd: Path | None = None) -> Path:
 
 
 def list_staged_all_md(repo_root: Path) -> list[str]:
-    """All staged *.md paths (not filtered by vault scope)."""
-    cp = _run_git(repo_root, "diff", "--cached", "--name-only", "-z", "--", "*.md")
+    """Staged *.md paths that still exist in the working tree (not filtered by vault scope).
+
+    Omits paths staged only as deletions so renames/moves do not list the old filename.
+    """
+    cp = _run_git(
+        repo_root,
+        "diff",
+        "--cached",
+        "--name-only",
+        "-z",
+        "--diff-filter=d",
+        "--",
+        "*.md",
+    )
     if cp.returncode != 0:
         raise RuntimeError(cp.stderr.decode(errors="replace"))
     out: list[str] = []
