@@ -5,6 +5,7 @@ import sys
 from vault_fm.ensure import apply_send_plan, prepare_send_file
 from vault_fm.errors import EncodingError, ParseError, ValidationError
 from vault_fm.gitutil import git_add, git_repo_root, list_staged_all_md
+from vault_fm.links import list_tracked_files_set, validate_in_scope_notes
 from vault_fm.paths import is_in_scope
 from vault_fm.version import require_python
 
@@ -59,6 +60,13 @@ def main(argv: list[str] | None = None) -> int:
         git_add(root, touched)
     except RuntimeError as e:
         print(str(e), file=sys.stderr)
+        return 1
+
+    tracked = list_tracked_files_set(root)
+    link_issues = validate_in_scope_notes(root, in_scope, tracked=tracked)
+    if link_issues:
+        for line in link_issues:
+            print(line, file=sys.stderr)
         return 1
 
     return 0

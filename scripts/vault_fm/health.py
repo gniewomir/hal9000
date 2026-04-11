@@ -7,6 +7,7 @@ from pathlib import Path
 
 from vault_fm.errors import EncodingError, ParseError
 from vault_fm.gitutil import git_repo_root, list_tracked_md
+from vault_fm.links import list_tracked_files_set, validate_in_scope_notes
 from vault_fm.io import compose_front_matter, read_file_utf8, split_front_matter
 from vault_fm.parse import parse_fm_inner, rebuild_fm_canonical
 from vault_fm.version import require_python
@@ -130,6 +131,12 @@ def main(argv: list[str] | None = None) -> int:
     issues, _a, _b, _c = scan_vault(root)
     for line in issues:
         print(line)
+
+    paths = list_tracked_md(root)
+    tracked = list_tracked_files_set(root)
+    for line in validate_in_scope_notes(root, paths, tracked=tracked):
+        print(line)
+        issues.append(line)
 
     return 0 if not issues else 1
 

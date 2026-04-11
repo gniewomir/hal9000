@@ -39,6 +39,22 @@ def _run_git(repo_root: Path, *args: str) -> subprocess.CompletedProcess[bytes]:
     )
 
 
+def list_tracked_files(repo_root: Path) -> list[str]:
+    """All git-tracked paths (any file type), forward slashes."""
+    cp = _run_git(repo_root, "ls-files", "-z")
+    if cp.returncode != 0:
+        raise RuntimeError(
+            f"git ls-files failed: {cp.stderr.decode(errors='replace')!r}"
+        )
+    out: list[str] = []
+    for raw in cp.stdout.split(b"\0"):
+        if not raw:
+            continue
+        out.append(normalize_rel_path(raw.decode("utf-8")))
+    out.sort()
+    return out
+
+
 def list_tracked_md(repo_root: Path) -> list[str]:
     """git ls-files '*.md', filtered by vault scope."""
     cp = _run_git(repo_root, "ls-files", "-z", "--", "*.md")
