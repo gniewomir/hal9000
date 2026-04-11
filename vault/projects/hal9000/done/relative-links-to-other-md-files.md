@@ -55,4 +55,4 @@ The vault already encodes **stable identity** in YAML (`id`, `references`), but 
 
 ## Stretch (automatic repair after moves)
 
-See [auto-fix-relative-links-to-md.md](../auto-fix-relative-links-to-md.md).
+See [auto-fix-relative-links-to-md.md](../../../ideas/hal9000/auto-fix-relative-links-to-md.md).
