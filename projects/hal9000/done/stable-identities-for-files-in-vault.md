@@ -18,7 +18,7 @@ We need **stable identities** for notes and a **durable way to record relations*
 - **UUID7** for ids and references gives opaque, collision-resistant identifiers with a **time-ordered** shape, which helps debugging and casual sorting without embedding meaning in the id.
 - **Hard invariants belong in automation**, not in long natural-language instructions: the **send** pipeline should enforce **immutable `id`** and **append-only `references`** so tooling and editors cannot accidentally violate the contract during normal sync.
 - **No mandatory Git hook** keeps daily work fast; **send** enforces the contract when you run it (staged, in-scope files). **Broader integrity and repair** are handled by a **separate health check** run when you choose—report by default, **`--fix`** where unambiguous, strict exit codes.
-- **Shell at the vault root, Python under `scripts/`** keeps entry points obvious (`./send.sh`, future helpers) while parsing and graph logic stay testable and maintainable.
+- **Shell at the vault root, Python under `.scripts/`** keeps entry points obvious (`./send.sh`, future helpers) while parsing and graph logic stay testable and maintainable.
 - **AI IDE instructions** (Cursor rules, `CLAUDE.md`, etc.) must stay **brief**: they are included in context for **every** conversation, so only non-negotiable bullets belong there; deeper explanation lives in this document. They are **advisory**; **send** and **health check** carry enforceable behavior.
 
 ## Chosen solution
@@ -26,7 +26,7 @@ We need **stable identities** for notes and a **durable way to record relations*
 ### Tooling layout
 
 - **Shell scripts** in the **repository root** act as the thin interface (invocation, Git, environment).
-- **Python scripts** under **`scripts/`** perform heavy lifting: front-matter ensure/merge, parsing, vault-wide scans, reporting, and optional fixes.
+- **Python scripts** under **`.scripts/`** perform heavy lifting: front-matter ensure/merge, parsing, vault-wide scans, reporting, and optional fixes.
 
 ### Which files participate (scope)
 
@@ -34,7 +34,7 @@ We need **stable identities** for notes and a **durable way to record relations*
 
 - **Included:** any **`.md`** file **under** the repository root **except**:
   - files whose path is **directly in the repo root** (no top-level `*.md`), and
-  - any file **under `scripts/`** (recursively), and
+  - any file **under `.scripts/`** (recursively), and
   - any file **under `.cursor/`** (recursively).
 - **Encoding:** in-scope files are **UTF-8**; invalid UTF-8 is an error.
 
@@ -55,12 +55,12 @@ For each **in-scope** Markdown document:
 
 ### Send pipeline (enforced)
 
-The **send** script (shell) invokes **`scripts/`** for **staged** `.md` files that are **in scope** (see above).
+The **send** script (shell) invokes **`.scripts/`** for **staged** `.md` files that are **in scope** (see above).
 
 **Staging and exit behavior**
 
 - **No staged `.md` at all** → **warning**, **non-zero** exit (abort; do not commit/push).
-- **Staged `.md` exists but none are in scope** (e.g. only root, `scripts/`, or `.cursor/`) → **warning**, **exit 0** (nothing to normalize).
+- **Staged `.md` exists but none are in scope** (e.g. only root, `.scripts/`, or `.cursor/`) → **warning**, **exit 0** (nothing to normalize).
 - **Warnings** (e.g. stripped self-refs) go to stderr; **exit 0** if the run **succeeded** (validation + writes + re-stage).
 
 **Validation before write**
@@ -80,7 +80,7 @@ This is the **authoritative** enforcement of identity and reference stability fo
 
 ### Health check (manual, in-scope tree)
 
-A **separate script** under `scripts/` (not a Git hook) scans **in-scope** markdown when run (same path rules as send).
+A **separate script** under `.scripts/` (not a Git hook) scans **in-scope** markdown when run (same path rules as send).
 
 **Data structures:** build a map **`id → file path(s)`** and collect all **referenced** ids from every `references` list (and any structures needed to detect duplicates and reverse links).
 
@@ -120,7 +120,7 @@ Hard guarantees come from **send** and **health check**, not from model behavior
 
 ## Implementation todo
 
-- [ ] Add **`scripts/`** layout (e.g. one module or small package for shared front-matter parsing and UUID7 generation; **stdlib only** per [minimal-python-setup.md](minimal-python-setup.md)).
+- [ ] Add **`.scripts/`** layout (e.g. one module or small package for shared front-matter parsing and UUID7 generation; **stdlib only** per [minimal-python-setup.md](minimal-python-setup.md)).
 - [ ] Implement **front matter I/O**: read first `---` … `---` block, hand-rolled subset for **`id`** / **`references`**, **opaque** preservation for other keys, preserve body bytes; UTF-8 validation.
 - [ ] Implement **UUID7** via `uuid.uuid7()` and **validate** UUID7 on read for `id` and every reference entry.
 - [ ] Implement **`ensure_front_matter` (or equivalent)** for send: create block if missing; ensure `id` exists; ensure `references` exists (default `[]`); **never** overwrite existing `id`; **merge** new reference ids (append-only); **collapse duplicate** ref entries; **strip** self-refs with warning; **validate-all / aggregate errors / no partial writes** on failure.

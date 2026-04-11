@@ -13,7 +13,7 @@ def normalize_rel_path(path: str) -> str:
 
 def is_in_scope(rel_path: str) -> bool:
     """
-    Participating markdown: any .md under repo except top-level *.md, scripts/**, and .cursor/**.
+    Participating markdown: any .md under repo except top-level *.md, .scripts/**, and .cursor/**.
     rel_path uses forward slashes relative to repo root.
     """
     p = normalize_rel_path(rel_path)
@@ -21,7 +21,7 @@ def is_in_scope(rel_path: str) -> bool:
         return False
     if "/" not in p:
         return False
-    if p.startswith("scripts/"):
+    if p.startswith(".scripts/"):
         return False
     if p.startswith(".cursor/"):
         return False

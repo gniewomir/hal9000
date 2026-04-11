@@ -5,14 +5,14 @@ references: []
 
 # Minimal Python setup (vault tooling)
 
-Companion to [stable identities for files in the vault](stable-identities-for-files-in-vault.md). This note records **requirements**, **reasoning**, **decisions**, and an **implementation plan** for Python under `scripts/` without poetry, pyenv, or committed third-party dependencies.
+Companion to [stable identities for files in the vault](stable-identities-for-files-in-vault.md). This note records **requirements**, **reasoning**, **decisions**, and an **implementation plan** for Python under `.scripts/` without poetry, pyenv, or committed third-party dependencies.
 
 ---
 
 ## Requirements
 
 - **Python:** 3.14 or higher on the machine. Entry points must **verify** the version at runtime rather than assume it.
-- **Layout:** Shell at the repository root (`send.sh`, future helpers). **Python under `scripts/`** for front-matter ensure/merge, parsing, vault-wide scans, and reporting.
+- **Layout:** Shell at the repository root (`send.sh`, future helpers). **Python under `.scripts/`** for front-matter ensure/merge, parsing, vault-wide scans, and reporting.
 - **Dependencies:** **Standard library only** for this track: no committed lockfiles, no `.venv` in the repo, no pyenv, poetry, pipenv, or similar unless the approach changes explicitly.
 - **Encoding:** In-scope files are **UTF-8**; invalid UTF-8 is an error with a clear message.
 - **Front matter:** YAML between `---` … `---`. Each participating note needs **`id`** (UUID7) and **`references`** (list of UUID7). **`references` must always be present**, even when empty. Managed keys are **`id` and `references` in lowercase only**; other casings (e.g. `Id:`) are **malformed** (see stable-identities doc for scope: which paths participate).
@@ -54,7 +54,7 @@ Companion to [stable identities for files in the vault](stable-identities-for-fi
 
 ## Implementation plan
 
-1. **Layout** — Add `scripts/` with one module (or a very small package) holding front-matter I/O, parsing, and shared types. Optionally add `.gitignore` entry for `.venv/` only if third-party deps are introduced later.
+1. **Layout** — Add `.scripts/` with one module (or a very small package) holding front-matter I/O, parsing, and shared types. Optionally add `.gitignore` entry for `.venv/` only if third-party deps are introduced later.
 
 2. **Version gate** — At CLI startup (and optionally in `send.sh` before invoking Python): require `sys.version_info >= (3, 14)`.
 
@@ -68,11 +68,11 @@ Companion to [stable identities for files in the vault](stable-identities-for-fi
 
 6. **`ensure_front_matter` (send path)** — If no block: insert default with new `uuid.uuid7()` and `references: []` (canonical). If `id` exists: never change it; if missing: set once. Ensure `references` exists; merge new reference ids per append-only rules; **collapse duplicate** ref entries (first occurrence wins); **strip** self-refs, **warn**. Re-serialize managed keys in canonical form inside their regions. **Send:** validate **all** in-scope staged files first, **aggregate errors**, **no writes** if any fail; on success, **`git add`** every path the tool rewrote, then shell continues to commit/push.
 
-7. **`send.sh`** — After version check, run Python over **staged** `.md` paths that **participate** (same path rules as health—see stable-identities doc). **No** staged `.md` at all → **warning, non-zero exit** (abort). **Staged only out-of-scope** (e.g. only root/`scripts/`/`.cursor/`) → **warning, exit 0**. On success, processed files are re-staged as above.
+7. **`send.sh`** — After version check, run Python over **staged** `.md` paths that **participate** (same path rules as health—see stable-identities doc). **No** staged `.md` at all → **warning, non-zero exit** (abort). **Staged only out-of-scope** (e.g. only root/`.scripts/`/`.cursor/`) → **warning, exit 0**. On success, processed files are re-staged as above.
 
-8. **Health check** — Separate `scripts/` entry point: scan **in-scope** `*.md` (see stable-identities doc for enumeration and exclusions), reuse the same parser, build `id → paths`, collect outgoing references, report issues. **`--fix`** applies writes **immediately** (including inserting a default `---` … `---` block when missing, and normalizing canonical layout after the fence for all notes with front matter). Exit **0** only when the in-scope vault is **fully clean** (strict); otherwise **non-zero**.
+8. **Health check** — Separate `.scripts/` entry point: scan **in-scope** `*.md` (see stable-identities doc for enumeration and exclusions), reuse the same parser, build `id → paths`, collect outgoing references, report issues. **`--fix`** applies writes **immediately** (including inserting a default `---` … `---` block when missing, and normalizing canonical layout after the fence for all notes with front matter). Exit **0** only when the in-scope vault is **fully clean** (strict); otherwise **non-zero**.
 
-9. **Tests** — Table-driven cases for scalars, block lists, flow lists, quoted values, and commas inside quoted flow elements. Run with `python3 -m unittest` or a small test module under `scripts/`.
+9. **Tests** — Table-driven cases for scalars, block lists, flow lists, quoted values, and commas inside quoted flow elements. Run with `python3 -m unittest` or a small test module under `.scripts/`.
 
 10. **AI-facing docs** — Keep Cursor/CLAUDE bullets short; link to [stable-identities-for-files-in-vault.md](stable-identities-for-files-in-vault.md) for enforceable behavior.
 
