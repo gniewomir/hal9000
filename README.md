@@ -8,7 +8,7 @@ Requires **Python 3.14+**
 
 Priority #1: Let me know, if something is wrong before I commit 
 
-Priority #2: If problem can by fixed automaticaly - fix it
+Priority #2: If something can by done/fixed automaticaly - do it
 
 ### send.sh
 
