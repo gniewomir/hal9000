@@ -58,8 +58,21 @@ def split_front_matter(text: str, raw_without_bom: bytes) -> SplitFrontMatter:
 
 
 def compose_front_matter(fm_text: str, body_bytes: bytes) -> bytes:
-    """Wrap fm_text with --- delimiters and append body bytes."""
-    block = f"---\n{fm_text}---\n".encode("utf-8")
+    """
+    Wrap fm_text with --- delimiters and append body bytes.
+
+    The inner YAML must end with a newline before the closing delimiter so the
+    fence is not glued to the last key. After the closing --- line, emit a newline
+    before the body; if the body does not already start with a line break, insert
+    one so the first body line is separated from the fence (a blank line when the
+    body had no leading newline).
+    """
+    inner = fm_text if (not fm_text or fm_text.endswith("\n")) else fm_text + "\n"
+    block = f"---\n{inner}---\n".encode("utf-8")
+    if not body_bytes:
+        return block
+    if not body_bytes.startswith(b"\n") and not body_bytes.startswith(b"\r\n"):
+        block += b"\n"
     return block + body_bytes
 
 

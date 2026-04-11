@@ -4,7 +4,7 @@ import unittest
 import uuid
 
 from vault_fm.errors import ParseError
-from vault_fm.io import default_fm_text, split_front_matter
+from vault_fm.io import compose_front_matter, default_fm_text, split_front_matter
 from vault_fm.parse import (
     find_matching_bracket,
     parse_fm_inner,
@@ -76,6 +76,33 @@ class TestSplitFm(unittest.TestCase):
         raw = b"hello\n"
         sp = split_front_matter(raw.decode(), raw)
         self.assertFalse(sp.has_fm)
+
+
+class TestComposeFm(unittest.TestCase):
+    def test_newline_after_fence_when_body_has_no_leading_break(self) -> None:
+        u = uuid.uuid7()
+        fm = default_fm_text(str(u))
+        out = compose_front_matter(fm, b"# Title\n")
+        self.assertIn(b"---\n", out)
+        self.assertTrue(out.startswith(b"---\n"))
+        # Blank line between closing --- and body when body did not start with \n
+        self.assertIn(b"---\n\n# Title\n", out)
+
+    def test_no_extra_blank_when_body_already_starts_with_newline(self) -> None:
+        u = uuid.uuid7()
+        fm = default_fm_text(str(u))
+        out = compose_front_matter(fm, b"\n# Title\n")
+        self.assertNotIn(b"---\n\n\n#", out)
+        self.assertIn(b"---\n\n# Title\n", out)
+
+    def test_roundtrip_split_preserves_compose_blank_line_rule(self) -> None:
+        u = uuid.uuid7()
+        fm = default_fm_text(str(u))
+        raw = compose_front_matter(fm, b"# x\n")
+        sp = split_front_matter(raw.decode("utf-8"), raw)
+        self.assertTrue(sp.has_fm)
+        raw2 = compose_front_matter(sp.fm_text or "", sp.body_bytes)
+        self.assertEqual(raw, raw2)
 
 
 class TestIsInScope(unittest.TestCase):

@@ -2,6 +2,7 @@
 id: 019d79fc-6a0c-7367-b3a9-de6e48426bc6
 references: []
 ---
+
 # Minimal Python setup (vault tooling)
 
 Companion to [stable identities for files in the vault](stable-identities-for-files-in-vault.md). This note records **requirements**, **reasoning**, **decisions**, and an **implementation plan** for Python under `scripts/` without poetry, pyenv, or committed third-party dependencies.
@@ -45,7 +46,7 @@ Companion to [stable identities for files in the vault](stable-identities-for-fi
 | Duplicate keys | More than one **`id:`** or **`references:`** at the same level → **malformed**. |
 | Block vs flow | **Parse both**; specify rules (indentation for block; bracket matching and comma splitting **outside** quotes for flow). |
 | Quotes | Unquoted tokens; single-quoted with `''` for a literal quote; double-quoted with at least `\"` and `\\`. |
-| Serialization | **Canonical value shape** for **`references`** (block list) even when the file previously used flow; **preserve key order** for the whole block. |
+| Serialization | **Canonical value shape** for **`references`** (block list) even when the file previously used flow; **preserve key order** for the whole block. **After the closing `---`**, always a **newline** before the body; if the body does not start with a line break, insert one (blank line before the first body line). |
 | Duplicate ref entries | On write, **collapse duplicates** preserving **first-seen order** of distinct ids. |
 | Self-reference | **`references`** must not include this note’s own **`id`**; send **strips** self-refs and **warns** (stderr); exit **0** if nothing else failed. |
 
@@ -57,7 +58,7 @@ Companion to [stable identities for files in the vault](stable-identities-for-fi
 
 2. **Version gate** — At CLI startup (and optionally in `send.sh` before invoking Python): require `sys.version_info >= (3, 14)`.
 
-3. **Front matter I/O** — Split each file into opening delimiter, **front matter text**, closing delimiter, and **body**; preserve body bytes. **No** `---` … `---` block: insert default (new `uuid.uuid7()`, `references: []`, canonical). When rewriting, replace only **`id`** / **`references`** regions; **opaque** lines for other keys stay in **original key order**.
+3. **Front matter I/O** — Split each file into opening delimiter, **front matter text**, closing delimiter, and **body**; preserve body bytes. **No** `---` … `---` block: insert default (new `uuid.uuid7()`, `references: []`, canonical). When rewriting, replace only **`id`** / **`references`** regions; **opaque** lines for other keys stay in **original key order**. On assemble, ensure a **newline after the closing `---`** before the body (insert a separating newline when the body does not already start with one).
 
 4. **Scalar parser** — One function: trim, then unquoted token, or single-quoted string, or double-quoted string with minimal escapes. Use it for `id` and for each list element. Validate **UUID7** after parse.
 
@@ -89,4 +90,4 @@ Document these rules next to the implementation and in tests:
 - **Other top-level keys:** **opaque** — preserved as text spans; not interpreted as full YAML objects (still **reject** if the overall block cannot be scanned safely for managed regions).
 - **Unsupported (reject or error clearly):** anchors, aliases, tags, merges, multiline scalars in exotic forms, arbitrary nested structures — unless you later widen the spec on purpose.
 
-Canonical **write** format for **`references`** should match what the tooling emits (block list for readability and stable diffs).
+Canonical **write** format for **`references`** should match what the tooling emits (block list for readability and stable diffs). The closing `---` is always followed by a newline before the markdown body (see Serialization above).

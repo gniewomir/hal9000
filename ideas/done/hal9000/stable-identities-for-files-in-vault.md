@@ -2,6 +2,7 @@
 id: 019d79fc-6a0c-7367-b3a9-de6f3141d363
 references: []
 ---
+
 # Stable identities for files in the vault
 
 ## Problem
@@ -50,6 +51,7 @@ For each **in-scope** Markdown document:
   - **`id`**: a **UUID7** for the note (stable for the lifetime of that logical note; when copying a file to create a new note, treat it as a **new** id—do not duplicate identity). Non-UUID7 values are invalid.
   - **`references`**: a list of **UUID7** values—**always present**, even when **empty**.
 - **Other keys** at the top level of the block are **opaque** to tooling: only **`id`** and **`references`** regions are parsed and rewritten; **original key order** is preserved.
+- **Layout after the block:** on **write**, the closing `---` is always followed by a **newline** before the markdown body. If the body does not already begin with a line break, the writer inserts one so the note body starts on its own line below the fence (typically a **blank** line between the fence and the first body line when the body had no leading newline).
 
 ### Send pipeline (enforced)
 
