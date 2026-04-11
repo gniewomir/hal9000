@@ -6,9 +6,15 @@ External storage for tech related things not always fitting in my head
 
 Requires **Python 3.14+**
 
-Priority #1: Let me know, if something is wrong before I commit 
+Priority #0: Don't ask me things - do the right thing by default
 
-Priority #2: If something can by done/fixed automaticaly - do it
+Priority #1: Convention over configuration
+
+Priority #2: Let me know, if something is wrong before I commit 
+
+Priority #3: No branching, html in md etc.
+
+Priority #4: If something can by done/fixed automaticaly - do it
 
 ### send.sh
 
