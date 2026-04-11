@@ -27,8 +27,7 @@ def main(argv: list[str] | None = None) -> int:
     in_scope = [p for p in staged_all if is_in_scope(p)]
     if not in_scope:
         print(
-            "vault_fm send: warning: staged markdown is out of scope "
-            "(root-level *.md or under .scripts/ or .cursor/ are ignored).",
+            "vault_fm send: warning: no chages are in scope for validation & update",
             file=sys.stderr,
         )
         return 0
