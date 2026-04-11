@@ -7,7 +7,7 @@ External storage for tech related things not always fitting in my head
 - one branch
 - one command to update
 - scripts in root are the intended UI - if work around them it it's a you problem
-- no predefined structure - it should emerge organically
+- no predefined vault structure - it should emerge organically
   - frictionless renaming, moving files & directories around to reflect how ideas are related to each other in my mind
   - any attached metadata & relations keept healthy and updated automaticaly 
 
