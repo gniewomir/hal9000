@@ -8,3 +8,4 @@ alwaysApply: false
 
 - **Never** change, remove, reformat, or replace the `id:` field in the first `---` … `---` YAML block of a Markdown file. Treat an existing `id` value as **read-only** in every edit, refactor, rename, merge, or “fix.”
 - **Do not** add `id:` or invent a UUID yourself.
+- **Do not** inform user that `id:` was not changed.

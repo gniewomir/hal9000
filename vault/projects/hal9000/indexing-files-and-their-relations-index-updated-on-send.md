@@ -27,6 +27,12 @@ Links and relations in those two edge collections are keyed by **target/source i
 
 Together this is **`id → { filepath, referencing, referenced_by }`** (naming may vary; semantics must not).
 
+## Alternative data model (strongly worth considering)
+
+**Strongly consider** a simpler split: the **index file** holds only **`id → filepath`** (enough to resolve ids to paths without a vault scan). **What references what**—outgoing links and incoming backlinks—is **not** duplicated in the index; it lives in **front matter** on each note (e.g. fields for links out and/or backlinks in, exact shape TBD).
+
+**Why it looks simpler:** one small persistent artifact (path map), graph semantics live **with** the content instead of a parallel JSON graph. **Tradeoffs to weigh:** front matter edits on every relation change; merge conflicts if multiple branches touch the same note’s relation fields; incremental send may still **derive** edges in memory for the dirty/touched set even if nothing writes a full graph file.
+
 ## Order of operations (send / commit pipeline)
 
 1. **Front matter** is validated and updated **first** so every in-scope note has a stable **`id`** (and any other required fields). Nothing consults or updates the link index **before** identities exist.
