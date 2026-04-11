@@ -29,7 +29,7 @@ def main(argv: list[str] | None = None) -> int:
     if not in_scope:
         print(
             "vault_fm send: warning: staged markdown is out of scope "
-            "(root-level *.md or under scripts/ are ignored).",
+            "(root-level *.md or under scripts/ or .cursor/ are ignored).",
             file=sys.stderr,
         )
         return 0

@@ -33,7 +33,8 @@ We need **stable identities** for notes and a **durable way to record relations*
 
 - **Included:** any **`.md`** file **under** the repository root **except**:
   - files whose path is **directly in the repo root** (no top-level `*.md`), and
-  - any file **under `scripts/`** (recursively).
+  - any file **under `scripts/`** (recursively), and
+  - any file **under `.cursor/`** (recursively).
 - **Encoding:** in-scope files are **UTF-8**; invalid UTF-8 is an error.
 
 Enumeration should match Git’s view of the tree (e.g. **`git ls-files`** for tracked paths) plus the path filters above—spell this in implementation so untracked paths do not silently diverge from what you commit.
@@ -57,7 +58,7 @@ The **send** script (shell) invokes **`scripts/`** for **staged** `.md` files th
 **Staging and exit behavior**
 
 - **No staged `.md` at all** → **warning**, **non-zero** exit (abort; do not commit/push).
-- **Staged `.md` exists but none are in scope** (e.g. only root or `scripts/`) → **warning**, **exit 0** (nothing to normalize).
+- **Staged `.md` exists but none are in scope** (e.g. only root, `scripts/`, or `.cursor/`) → **warning**, **exit 0** (nothing to normalize).
 - **Warnings** (e.g. stripped self-refs) go to stderr; **exit 0** if the run **succeeded** (validation + writes + re-stage).
 
 **Validation before write**

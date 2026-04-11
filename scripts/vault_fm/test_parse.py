@@ -11,6 +11,7 @@ from vault_fm.parse import (
     rebuild_fm_canonical,
     split_flow_list_inner,
 )
+from vault_fm.paths import is_in_scope
 
 
 class TestFlowBracket(unittest.TestCase):
@@ -75,6 +76,14 @@ class TestSplitFm(unittest.TestCase):
         raw = b"hello\n"
         sp = split_front_matter(raw.decode(), raw)
         self.assertFalse(sp.has_fm)
+
+
+class TestIsInScope(unittest.TestCase):
+    def test_cursor_excluded(self) -> None:
+        self.assertFalse(is_in_scope(".cursor/rules/note.md"))
+
+    def test_vault_note_included(self) -> None:
+        self.assertTrue(is_in_scope("topics/foo/bar.md"))
 
 
 if __name__ == "__main__":
