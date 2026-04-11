@@ -20,7 +20,7 @@ Companion to [stable identities for files in the vault](stable-identities-for-fi
   - **`references` as an array:** accept both **block sequence** (`- item` under the key) and **flow sequence** (`[a, b]` on the line with `references:` or immediately following the colon per agreed rules).
   - **Scalars:** support **unquoted**, **single-quoted**, and **double-quoted** values for `id` and for each entry in `references`.
 - **Code style:** Small surface area; avoid sprawl of one-off helpers. Prefer one scalar parser, two list paths (block vs flow), and shared front-matter split/merge logic.
-- **Behavior:** Send enforces **immutable `id`** and **append-only `references`**, with explicit normalizations (duplicate ref collapse, self-reference strip—see stable-identities doc). Health check is separate; **`--fix` writes immediately** to disk (default front matter if the note has no block, then other safe repairs—see stable-identities doc); Git is the review gate.
+- **Behavior:** Send enforces **immutable `id`** and **append-only `references`**, with explicit normalizations (duplicate ref collapse, self-reference strip—see stable-identities doc). Health check is separate; **`--fix` writes immediately** to disk (default front matter if the note has no block, canonical layout after the fence for every note with front matter, then other safe repairs—see stable-identities doc); Git is the review gate.
 
 ---
 
@@ -70,7 +70,7 @@ Companion to [stable identities for files in the vault](stable-identities-for-fi
 
 7. **`send.sh`** — After version check, run Python over **staged** `.md` paths that **participate** (same path rules as health—see stable-identities doc). **No** staged `.md` at all → **warning, non-zero exit** (abort). **Staged only out-of-scope** (e.g. only root/`scripts/`/`.cursor/`) → **warning, exit 0**. On success, processed files are re-staged as above.
 
-8. **Health check** — Separate `scripts/` entry point: scan **in-scope** `*.md` (see stable-identities doc for enumeration and exclusions), reuse the same parser, build `id → paths`, collect outgoing references, report issues. **`--fix`** applies writes **immediately** (including inserting a default `---` … `---` block when missing). Exit **0** only when the in-scope vault is **fully clean** (strict); otherwise **non-zero**.
+8. **Health check** — Separate `scripts/` entry point: scan **in-scope** `*.md` (see stable-identities doc for enumeration and exclusions), reuse the same parser, build `id → paths`, collect outgoing references, report issues. **`--fix`** applies writes **immediately** (including inserting a default `---` … `---` block when missing, and normalizing canonical layout after the fence for all notes with front matter). Exit **0** only when the in-scope vault is **fully clean** (strict); otherwise **non-zero**.
 
 9. **Tests** — Table-driven cases for scalars, block lists, flow lists, quoted values, and commas inside quoted flow elements. Run with `python3 -m unittest` or a small test module under `scripts/`.
 

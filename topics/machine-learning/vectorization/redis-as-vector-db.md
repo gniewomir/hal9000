@@ -2,6 +2,7 @@
 id: 019d7a35-4575-7212-a52f-e36e5851ba23
 references: []
 ---
+
 AI projects written in Python often involve working with numpy arrays. Even if you don’t train your own neural network, you’ll at least be touching vector embeddings, either to support semantic search or make an LLM agent empowered with RAG. Sometimes you need to serialize them in JSON, and the standard library is not the best option for this task.
 
 # Insights

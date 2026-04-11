@@ -2,6 +2,7 @@
 id: 019d7a30-17ff-77f9-abb1-cd6f7e5d2a2f
 references: []
 ---
+
 # Relative links (validation)
 
 ## Problem

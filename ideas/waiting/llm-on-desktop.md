@@ -2,6 +2,7 @@
 id: 019d7a02-4753-7589-8b1f-45f93d66c23f
 references: []
 ---
+
 # Repurpose gaming desktop as local LLM server
 
 Instead of selling/trashing the gaming desktop, set it up as a local LLM inference server with Ollama. Other devices on the same local WiFi network call it via HTTP API for embeddings, generation, vision, etc.

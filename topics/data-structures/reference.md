@@ -2,6 +2,7 @@
 id: 019d7a35-4574-73e5-a9ba-83d88cb92a57
 references: []
 ---
+
 # Data Structures Reference
 
 Comprehensive reference of data structures with descriptions and time complexity.

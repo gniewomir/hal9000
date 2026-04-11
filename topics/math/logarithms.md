@@ -2,6 +2,7 @@
 id: 019d7a35-4577-7313-aa19-627b92853557
 references: []
 ---
+
 # Logarithms
 
 ## The core idea

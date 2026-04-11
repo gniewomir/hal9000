@@ -111,6 +111,26 @@ def _fix_missing_front_matter_blocks(repo_root: Path) -> None:
         _insert_default_front_matter_if_missing(repo_root, rel)
 
 
+def _normalize_compose_layout(repo_root: Path) -> None:
+    """
+    Rewrite in-scope notes where disk bytes differ from compose_front_matter output.
+    Applies the canonical layout rules (including at least one newline after the
+    closing --- before the body) without changing parsed id or references content.
+    """
+    for rel in list_tracked_md(repo_root):
+        path = repo_root / rel
+        try:
+            text, raw = read_file_utf8(path)
+            sp = split_front_matter(text, raw)
+        except (EncodingError, ParseError):
+            continue
+        if not sp.has_fm:
+            continue
+        new_bytes = compose_front_matter(sp.fm_text or "", sp.body_bytes)
+        if new_bytes != raw:
+            path.write_bytes(new_bytes)
+
+
 def fix_vault(repo_root: Path) -> None:
     """Apply safe automatic fixes (may run multiple internal passes)."""
     _fix_missing_front_matter_blocks(repo_root)
@@ -146,6 +166,9 @@ def fix_vault(repo_root: Path) -> None:
         if filt == p.refs_parsed:
             continue
         _rewrite_note(repo_root, rel, p.id_val, filt)
+
+    # 3) Canonical layout (newline after closing ---, inner YAML newline before ---, etc.)
+    _normalize_compose_layout(repo_root)
 
 
 def main(argv: list[str] | None = None) -> int:

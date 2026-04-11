@@ -2,6 +2,7 @@
 id: 019d7a35-4576-7122-92b5-47fb040523da
 references: []
 ---
+
 ## What is a Reranker?
 
 A **reranker** is a second-stage model that re-scores and reorders the candidate documents returned by an initial vector similarity search (the "retriever") to improve relevance before results are passed to an LLM or shown to a user.
