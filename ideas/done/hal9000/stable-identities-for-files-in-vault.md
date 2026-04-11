@@ -95,6 +95,7 @@ A **separate script** under `scripts/` (not a Git hook) scans **in-scope** markd
 **`--fix` (writes immediately)**
 
 - **`--fix`** applies safe transforms **on disk** as soon as it runs; Git is the review gate (no separate `--apply` step).
+- **Missing front matter block:** insert a default block (new UUID7 `id`, `references: []`, canonical shape)—same outcome as send’s ensure path for a file with no `---` … `---` opener.
 - **Dangling references:** remove from `references` any id that does not exist in the vault.
 - **Duplicate ids when the id is not referenced anywhere:** auto-resolve by choosing a **canonical** file (deterministic rule, e.g. sort paths and pick one), **keep** its `id`, assign **new UUID7** `id`s to the other files. Safe because nothing in the graph points at that id yet.
 
@@ -122,6 +123,6 @@ Hard guarantees come from **send** and **health check**, not from model behavior
 - [ ] Implement **`ensure_front_matter` (or equivalent)** for send: create block if missing; ensure `id` exists; ensure `references` exists (default `[]`); **never** overwrite existing `id`; **merge** new reference ids (append-only); **collapse duplicate** ref entries; **strip** self-refs with warning; **validate-all / aggregate errors / no partial writes** on failure.
 - [ ] Update **`send.sh`**: Python 3.14+ gate; staged in-scope `.md` only; exit rules (no staged `.md` vs only out-of-scope); **`git add`** after successful rewrites; then commit/push as today.
 - [ ] Implement **`healthcheck` command**: enumerate in-scope `*.md` (path rules + `git ls-files` or equivalent); build `id → paths` and outgoing references; strict exit codes; issues include malformed FM / invalid UUID7 / key rules.
-- [ ] Add **`--fix`** to health: **writes immediately**; remove dangling refs; resolve duplicate ids **only** when unreferenced (document canonical-file rule); print actionable report for unresolved duplicate-id cases; **strict** exit (0 only if fully clean after run).
+- [ ] Add **`--fix`** to health: **writes immediately**; insert missing front matter where unambiguous; remove dangling refs; resolve duplicate ids **only** when unreferenced (document canonical-file rule); print actionable report for unresolved duplicate-id cases; **strict** exit (0 only if fully clean after run).
 - [ ] Smoke-test on a few real notes: new file, existing without FM, append reference, duplicate refs, self-ref strip, malformed FM, out-of-scope-only staging.
 - [ ] Add **brief** AI-facing instructions (e.g. short `CLAUDE.md` section and/or one Cursor rule) that mirror this doc’s non-negotiables and link here; keep under a few bullets.

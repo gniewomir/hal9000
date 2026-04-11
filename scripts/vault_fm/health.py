@@ -8,7 +8,12 @@ from pathlib import Path
 from vault_fm.errors import EncodingError, ParseError
 from vault_fm.gitutil import git_repo_root, list_tracked_md
 from vault_fm.links import list_tracked_files_set, validate_in_scope_notes
-from vault_fm.io import compose_front_matter, read_file_utf8, split_front_matter
+from vault_fm.io import (
+    compose_front_matter,
+    default_fm_text,
+    read_file_utf8,
+    split_front_matter,
+)
 from vault_fm.parse import parse_fm_inner, rebuild_fm_canonical
 from vault_fm.version import require_python
 
@@ -80,8 +85,36 @@ def _rewrite_note(
     (repo_root / rel).write_bytes(out)
 
 
+def _insert_default_front_matter_if_missing(repo_root: Path, rel: str) -> bool:
+    """
+    If rel has no --- … --- block, prepend canonical default front matter.
+    Returns True if the file was written.
+    """
+    path = repo_root / rel
+    try:
+        text, raw = read_file_utf8(path)
+        sp = split_front_matter(text, raw)
+    except (EncodingError, ParseError):
+        return False
+    if sp.has_fm:
+        return False
+    note_id = uuid.uuid7()
+    fm_new = default_fm_text(str(note_id))
+    out = compose_front_matter(fm_new, sp.body_bytes)
+    path.write_bytes(out)
+    return True
+
+
+def _fix_missing_front_matter_blocks(repo_root: Path) -> None:
+    """Insert canonical default front matter when a file has no --- … --- block."""
+    for rel in list_tracked_md(repo_root):
+        _insert_default_front_matter_if_missing(repo_root, rel)
+
+
 def fix_vault(repo_root: Path) -> None:
     """Apply safe automatic fixes (may run multiple internal passes)."""
+    _fix_missing_front_matter_blocks(repo_root)
+
     _issues, id_to_paths, referenced, _note_ids = scan_vault(repo_root)
 
     # 1) Duplicate ids not referenced anywhere
