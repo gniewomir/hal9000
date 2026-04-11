@@ -1,3 +1,7 @@
+---
+id: 019d7a35-4579-7785-bf37-a7477aac8736
+references: []
+---
 ## Commander.js and Process Signals — Summary
 
 **Commander provides no signal handling or cleanup mechanism.** Handling it yourself was the right call.

@@ -1,3 +1,7 @@
+---
+id: 019d7a35-4573-75b0-808d-98c67c250ad0
+references: []
+---
 # Asymptotic Notation
 
 Asymptotic notation describes how the runtime or space requirements of an algorithm grow as the input size approaches infinity. It abstracts away constants and lower-order terms to focus on the dominant factor that determines scalability.

@@ -1,3 +1,7 @@
+---
+id: 019d7a35-4574-73e5-a9ba-83d962f1681c
+references: []
+---
 Here is a summary of our conversation regarding the "Token Tax" in Large Language Models (LLMs). 
 
 ***Disclaimer:** Please note that the AI industry evolves at a breakneck pace. The specific multipliers, model vocabulary sizes, and the current state of the market discussed below reflect the landscape up to recent years (roughly 2023–2026). Because AI companies continuously update their tokenizers and training methodologies, exact costs and efficiency ratios for specific languages may be outdated or change rapidly.*
