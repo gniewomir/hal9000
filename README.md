@@ -7,6 +7,7 @@ External storage for tech related things not always fitting in my head
 Requires **Python 3.14+**
 
 Priority #1: Let me know, if something is wrong before I commit 
+
 Priority #2: If problem can by fixed automaticaly - fix it
 
 ### send.sh
