@@ -7,7 +7,7 @@ references: []
 
 Memory files can have relations established by frontmatter and ids and/or file structure 
 
-After implementing [automated reference reference updates](./automaticaly-update-references-based-on-relative-links-hal9000.md) which translates relations established by LLM to id's without friction i want to avoid. 
+After implementing [automated reference reference updates](../../automaticaly-update-references-based-on-relative-links-hal9000.md) which translates relations established by LLM to id's without friction i want to avoid. 
 
 Natural followup would be to establish relations between conepts based on their location, 
 
