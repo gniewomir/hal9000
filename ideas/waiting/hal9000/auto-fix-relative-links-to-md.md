@@ -7,7 +7,7 @@ references: []
 
 ## Problem
 
-Even with [validation of relative links to other Markdown files](relative-links-to-other-md-files.md), every **rename or move** can leave many notes with outdated paths. Fixing them by hand is tedious and error-prone. A checker alone tells you what broke; it does not **rewrite** links to follow the new layout.
+Even with [validation of relative links to other Markdown files](../../done/hal9000/relative-links-to-other-md-files.md), every **rename or move** can leave many notes with outdated paths. Fixing them by hand is tedious and error-prone. A checker alone tells you what broke; it does not **rewrite** links to follow the new layout.
 
 ## Reasoning
 
