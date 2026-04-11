@@ -25,4 +25,6 @@ def is_in_scope(rel_path: str) -> bool:
         return False
     if p.startswith(".cursor/"):
         return False
+    if p.startswith(".claude/"):
+        return False
     return True

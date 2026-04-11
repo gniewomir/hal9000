@@ -1,8 +1,3 @@
----
-id: 019d7d91-cb9f-7255-8a4e-4963bab1f8f4
-references: []
----
-
 # Vault (this repo)
 
 - **YAML front matter (`---` … `---`):** Never modify the `id:` field—no edits, renames, reformatting, or new UUIDs. Existing `id` is read-only.
