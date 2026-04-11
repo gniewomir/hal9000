@@ -1,6 +1,7 @@
 ---
 description: Use Markdown [text](url) links, not HTML, in vault Markdown
-alwaysApply: true
+globs: "**/*.md"
+alwaysApply: false
 ---
 
 # Markdown link syntax
