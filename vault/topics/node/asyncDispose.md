@@ -62,6 +62,17 @@ When the block containing a `using` or `await using` declaration exits — wheth
 
 This also works inside `for`, `for...of`, `switch`, and any other block. Each loop iteration disposes resources acquired during that iteration.
 
+### Acquisition: sync vs async initializers
+
+The `await` in `await using` controls **disposal** (async cleanup when the block ends). It does **not** await the right-hand side during acquisition. If your factory returns a `Promise`, you still need a normal `await` on the initializer expression to unwrap it before the binding is registered.
+
+| Situation | Pattern |
+|---|---|
+| Factory returns the resource **synchronously** | `await using cx = createObjectWithAsyncDisposableSynchronously()` |
+| Factory returns a **Promise** of the resource | `await using cx = await createPromiseOfObjectWithAsyncDisposable()` |
+
+If you omit `await` on a promise-returning factory, `cx` is the Promise object itself, not your disposable — that usually fails validation (no `[Symbol.asyncDispose]` / `[Symbol.dispose]`) or disposes the wrong thing.
+
 ## TypeScript and Node.js requirements
 
 | Requirement | Minimum version |
