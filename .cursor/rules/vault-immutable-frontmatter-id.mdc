@@ -1,6 +1,6 @@
 ---
 description: Never alter YAML front matter id (UUID7) in vault Markdown
-globs: "**/*.md"
+globs: **/*.md
 alwaysApply: false
 ---
 
