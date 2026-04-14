@@ -1,0 +1,7 @@
+---
+description: Never alter YAML front matter
+globs: "**/*.md"
+alwaysApply: false
+---
+
+NEVER add, modify or remove frontmatter in markdown files.
