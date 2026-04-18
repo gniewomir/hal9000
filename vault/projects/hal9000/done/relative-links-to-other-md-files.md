@@ -51,4 +51,4 @@ Tools and authors add **relative** Markdown links to notes and assets, e.g. `[ti
 
 ## Stretch (automatic repair after moves)
 
-See [auto-fix-relative-links-to-md.md](../auto-fix-relative-links-to-md.md).
+See [auto-fix-relative-links-to-md.md](auto-fix-relative-links-to-md.md).
