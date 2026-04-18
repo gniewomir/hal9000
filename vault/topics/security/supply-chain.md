@@ -7,7 +7,7 @@ min-release-age (from NPM v11.10.0)
 
 ```
 npm config set save-exact=true
-npm config set min-release-age=true
+npm config set min-release-age=14
 ```
 
 ~/.npmrc
