@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": "python3 .cursor/hooks/block-frontmatter.py",
+        "matcher": "Write|StrReplace",
+        "failClosed": false
+      }
+    ]
+  }
+}
