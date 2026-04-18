@@ -1,7 +1,3 @@
----
-id: 019d832c-dd68-7068-ab44-df534f213363
-references: []
----
 
 # Redis: memory and disk
 

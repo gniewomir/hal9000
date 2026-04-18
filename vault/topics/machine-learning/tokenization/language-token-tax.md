@@ -1,7 +1,3 @@
----
-id: 019d7a35-4574-73e5-a9ba-83d962f1681c
-references: []
----
 
 Here is a summary of our conversation regarding the "Token Tax" in Large Language Models (LLMs). 
 

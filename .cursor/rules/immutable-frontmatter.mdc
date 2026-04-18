@@ -1,7 +1,7 @@
 ---
-description: Never alter YAML front matter
+description: Vault markdown has no YAML front matter
 globs: "**/*.md"
 alwaysApply: false
 ---
 
-NEVER add, modify or remove frontmatter in markdown files.
+Do not add YAML front matter (`---` … `---`) to markdown under the vault. Identity is the file path; relations are links in the body only.

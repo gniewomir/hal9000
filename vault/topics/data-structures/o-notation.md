@@ -1,7 +1,3 @@
----
-id: 019d7a35-4573-75b0-808d-98c67c250ad0
-references: []
----
 
 # Asymptotic Notation
 

@@ -1,7 +1,3 @@
----
-id: 019d86f3-e11f-70da-90e9-27db243f6c60
-references: []
----
 
 # Node.js: memory (heap, RSS) and runtime tracking
 

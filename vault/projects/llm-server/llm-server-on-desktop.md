@@ -1,7 +1,3 @@
----
-id: 019d7a02-4753-7589-8b1f-45f93d66c23f
-references: []
----
 
 # Repurpose gaming desktop as local LLM server
 

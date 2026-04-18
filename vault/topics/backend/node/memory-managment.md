@@ -1,7 +1,3 @@
----
-id: 019d86f3-e125-71a8-ad5c-e45ff801c20e
-references: []
----
 
 # Node.js memory management
 

@@ -1,7 +1,3 @@
----
-id: 019d7a35-4573-75b0-808d-98c57d0e3615
-references: []
----
 
 # Assessing Big O in Practice
 

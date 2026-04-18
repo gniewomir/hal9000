@@ -1,7 +1,3 @@
----
-id: 019d7a66-8c5f-73cb-8c1d-87b864f45398
-references: []
----
 
 # Problem 
 

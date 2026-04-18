@@ -1,7 +1,3 @@
----
-id: 019d8def-4088-74cc-9a4f-00ef550dbaa2
-references: []
----
 
 # Chokidar and file descriptors
 

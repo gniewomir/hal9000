@@ -1,7 +1,3 @@
----
-id: 019d7d9c-c96e-77ab-bb1e-e9eaf89b5359
-references: []
----
 
 # Package `__init__.py` files (Python 3+)
 

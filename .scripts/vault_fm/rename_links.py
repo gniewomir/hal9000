@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from vault_fm.errors import EncodingError, ParseError
+from vault_fm.errors import EncodingError
 from vault_fm.gitutil import git_add, list_cached_renames, list_tracked_md
-from vault_fm.io import compose_front_matter, read_file_utf8, split_front_matter
+from vault_fm.io import read_file_utf8
 from vault_fm.links import (
     _path_part_for_check,
     _should_skip_destination,
@@ -66,25 +66,14 @@ def apply_rename_repairs_to_vault(repo_root: Path) -> list[str]:
         path = repo_root / rel
         try:
             text, raw = read_file_utf8(path)
-            sp = split_front_matter(text, raw)
-        except (EncodingError, ParseError, OSError):
+        except (EncodingError, OSError):
             continue
-        if not sp.has_fm:
-            body = text
-            fm_text = None
-        else:
-            body = sp.body_bytes.decode("utf-8")
-            fm_text = sp.fm_text
 
         replace_dest = _make_replace_dest(rel, rename)
-        new_body = rewrite_note_body_links(rel, body, replace_dest)
+        new_body = rewrite_note_body_links(rel, text, replace_dest)
         if new_body is None:
             continue
-        new_bytes = (
-            new_body.encode("utf-8")
-            if not sp.has_fm
-            else compose_front_matter(fm_text or "", new_body.encode("utf-8"))
-        )
+        new_bytes = new_body.encode("utf-8")
         if new_bytes != raw:
             path.write_bytes(new_bytes)
             touched.append(rel)

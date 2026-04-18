@@ -1,7 +1,3 @@
----
-id: 019d7da4-efa7-7078-9a79-0924c0ca4ba5
-references: []
----
 
 # Spacing and the 8px baseline
 

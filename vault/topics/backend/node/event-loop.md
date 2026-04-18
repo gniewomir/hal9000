@@ -1,7 +1,3 @@
----
-id: 019da1b7-1e65-7098-af89-e2e25f1ea935
-references: []
----
 
 # Node.js event loop
 

@@ -1,7 +1,3 @@
----
-id: 019d7a35-4577-7313-aa19-627a50a79b54
-references: []
----
 
 # Front matter alternatives that render well in markdown
 

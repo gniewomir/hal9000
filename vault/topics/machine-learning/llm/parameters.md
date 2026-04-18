@@ -1,7 +1,3 @@
----
-id: 019d7cd7-d560-7754-a90c-ce7a90bca7fd
-references: []
----
 
 # Parameters in Large Language Models
 

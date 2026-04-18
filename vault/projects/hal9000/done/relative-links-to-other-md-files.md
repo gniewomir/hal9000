@@ -1,7 +1,3 @@
----
-id: 019d7a30-17ff-77f9-abb1-cd6f7e5d2a2f
-references: []
----
 
 # Relative links (validation)
 
@@ -9,13 +5,13 @@ references: []
 
 Tools and authors add **relative** Markdown links to notes and assets, e.g. `[title](sibling.md)`, `[title](../folder/note.md)`, or `![fig](../assets/diagram.png)`. Those links are useful in editors and on GitHub. When files are **moved or renamed**, path-based links that still use the old location **break silently** until someone opens the target or runs a link checker.
 
-The vault already encodes **stable identity** in YAML (`id`, `references`), but **body links are separate**: they are not updated by front-matter tooling and can drift after renames.
+**Identity** for a note is its **repo-relative path**; the **graph** between notes is carried only by **links in the body**. Those links can still **drift after renames** unless validation (and optional rename-based repair) updates targets.
 
 ## Reasoning
 
 - Catching broken links **at send time** and in a **health** pass fails fast: bad changes do not land without an explicit fix.
 - Validation is **mechanical**: resolve each in-scope relative target from the source file (or repo root for leading `/`), normalize, and check policy (tracked file, correct casing, no symlink-as-target).
-- This complements UUID-based `references:`: front matter stays canonical for graph semantics; body links stay human-readable, with integrity enforced by resolution checks.
+- Rename/copy detection (`index` vs `HEAD`) can **rewrite** link destinations to match moved files while preserving `#` / `?` suffixes; everything else stays a hard validation error until fixed manually.
 
 ## Specification (decisions)
 
@@ -45,8 +41,8 @@ The vault already encodes **stable identity** in YAML (`id`, `references`), but 
 
 ### `send` and `health`
 
-- **`vault_fm send`:** Run link validation **after** front-matter / ensure steps have been written for the send plan, **before** commit/push. Staging is expected to happen so the working tree matches what you commit; validation uses the **current working tree** against **tracked** targets.
-- **`vault_fm health`:** Same validation rules over in-scope files (full pass as appropriate).
+- **`vault_fm send`:** When there is at least one **staged** in-scope `.md` file, runs **full-repo** link validation (and rename-based repair when needed) before the shell script commits. Validation uses the **current working tree** against **tracked** targets.
+- **`vault_fm health`:** Same validation rules over all in-scope tracked markdown (`--fix` enables the rename-repair loop).
 
 ### Errors and exit code
 

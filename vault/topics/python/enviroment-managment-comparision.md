@@ -1,7 +1,3 @@
----
-id: 019d7c50-342c-74bf-bde9-4d7a9ac441b5
-references: []
----
 
 # Python environment tooling — comparison
 

@@ -29,7 +29,7 @@ Deliver a **single markdown document** (new or revised) with **exactly these top
 
 Use `##` headings with those section titles (adjust parenthetical bits to match, but keep the six-part structure).
 
-Optional: a single `#` title line at the top for the concept name. **Do not add YAML frontmatter** to generated or reworked files unless the user explicitly asks (this repo discourages unsolicited frontmatter changes).
+Optional: a single `#` title line at the top for the concept name. **Do not add YAML front matter** to generated or reworked vault markdown unless the user explicitly asks; the vault does not use front matter for identity or relations.
 
 ## Reworking existing documents
 

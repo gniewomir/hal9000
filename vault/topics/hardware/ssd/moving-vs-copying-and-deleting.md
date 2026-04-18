@@ -1,7 +1,3 @@
----
-id: 019d87fd-eeee-71e9-b363-1e77875a63d5
-references: []
----
 
 # Moving vs copy + delete (typical filesystems)
 

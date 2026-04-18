@@ -1,7 +1,3 @@
----
-id: 019d9c61-463c-77f8-8c11-72aa52e93a3e
-references: []
----
 
 Think of a headless browser as a "phantom" version of Chrome or Firefox—it has the engine but lacks the body (the UI). Because it’s often used for automation or scraping, websites have built sophisticated "metal detectors" to spot them.
 

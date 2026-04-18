@@ -1,7 +1,3 @@
----
-id: 019d87ce-c86d-727c-a998-975399ee61fa
-references: []
----
 
 # LLM input: plain text vs Markdown, implicit structure, and job-offer extraction
 

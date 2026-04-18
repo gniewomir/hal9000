@@ -1,7 +1,3 @@
----
-id: 019d7a75-0ae4-7105-a861-4186ba34003c
-references: []
----
 
 # Directed graphs and DAGs
 

@@ -1,7 +1,3 @@
----
-id: 019da1c6-5288-73bb-a784-14d4209553e6
-references: []
----
 
 # Ollama on localhost + Nginx (Basic auth) for LAN access
 

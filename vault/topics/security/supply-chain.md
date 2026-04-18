@@ -1,7 +1,3 @@
----
-id: 019d7a35-4578-74e6-8299-c55033979a9e
-references: []
----
 
 min-release-age (from NPM v11.10.0)
 

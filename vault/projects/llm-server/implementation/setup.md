@@ -1,7 +1,3 @@
----
-id: 019da1c6-5288-73bb-a784-14d5ca926e4e
-references: []
----
 
 # Automated setup (`setup-ollama-nginx-lan.sh`)
 

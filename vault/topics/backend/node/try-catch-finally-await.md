@@ -1,7 +1,3 @@
----
-id: 019d8c19-5313-71fb-8148-3b895a332dfa
-references: []
----
 
 # `await` in `try` / `catch` / `finally` (JavaScript / Node.js)
 

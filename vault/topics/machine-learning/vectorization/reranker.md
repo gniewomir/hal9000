@@ -1,7 +1,3 @@
----
-id: 019d7a35-4576-7122-92b5-47fb040523da
-references: []
----
 
 ## What is a Reranker?
 

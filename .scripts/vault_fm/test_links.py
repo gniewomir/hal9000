@@ -64,11 +64,11 @@ class TestValidateBody(unittest.TestCase):
     def test_tracked_ok(self) -> None:
         root = Path(__file__).resolve().parents[2]
         rel = ".scripts/vault_fm/test_links.py"
-        tracked = frozenset({rel, ".scripts/vault_fm/parse.py"})
+        tracked = frozenset({rel, ".scripts/vault_fm/io.py"})
         issues = validate_note_body_links(
             root,
             rel,
-            "see [p](parse.py)",
+            "see [p](io.py)",
             tracked,
         )
         self.assertEqual(issues, [])
@@ -78,6 +78,6 @@ class TestCheckOnePath(unittest.TestCase):
     def test_tracked_regular_file(self) -> None:
         root = Path(__file__).resolve().parents[2]
         rel_self = ".scripts/vault_fm/test_links.py"
-        tracked = frozenset({rel_self, ".scripts/vault_fm/parse.py"})
-        err = _check_one_path(root, rel_self, "parse.py", tracked)
+        tracked = frozenset({rel_self, ".scripts/vault_fm/io.py"})
+        err = _check_one_path(root, rel_self, "io.py", tracked)
         self.assertIsNone(err)

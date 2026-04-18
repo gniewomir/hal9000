@@ -1,20 +1,3 @@
----
-id: 019d8df0-a371-7666-bd20-4a1d02501a4d
-
-## id: 019d8de2-b0da-71c3-aadf-da0b076d73ee
-references: []
-
-# Node.js: file descriptors and handles
-
-## Two layers
-
-**Kernel file descriptors (FDs)** are small integers the OS assigns per process. Each one points at an open object: a real file, a pipe, a TCP socket, a TTY, etc.
-
-**Node’s API** sits on **libuv**. Most I/O uses libuv “handles” that ultimately own or wrap OS FDs. You rarely see raw integers unless you use the lower-level `fs` APIs or `net.Socket`’s `socket.fd` (when available).
-
-So “handle” in docs often means **libuv’s abstraction**; “fd” means **the OS integer**. They’re related: closing the Node/libuv side should release the FD (when nothing else duplicates it).
-
----
 
 ## When FDs are acquired
 

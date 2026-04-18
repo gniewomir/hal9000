@@ -9,7 +9,7 @@ External storage for tech related things not always fitting in my head
 - scripts in root are the intended UI - if work around them it it's a you problem
 - no predefined vault structure - it should emerge organically
   - frictionless renaming, moving files & directories around to reflect how ideas are related to each other in my mind
-  - any attached metadata & relations keept healthy and updated automaticaly 
+  - relative links between notes stay consistent via validation and automatic repair after git-detected renames
 
 ## Vault tooling
 
@@ -21,22 +21,14 @@ Requires **Python 3.14+** or higher to be available
 
 ### send.sh
 
-- stages all changes, validates links, creates frontmatter if not present, stage, push
-- adds identity to new files (frontmatter block with id)
-- checks for broken relative links
-- checks for duplicated ids in staged changes
+- stages all changes, validates relative links in tracked vault markdown (and applies rename-based link repair when needed), then commit and push
 
 ### check.sh
 
-- run the same validation checks as send.sh
-- checks for broken relative links
-- check for duplicated ids in all markdown
-- checks for broken relative links in all markdown
-
-NOTE: markdown in root, .scripts, and .cursor directory is excluded 
+- validates relative links in all tracked in-scope markdown (same resolution rules as send)
 
 ### fix.sh
 
-- same as check, but fixing problems that can be fixed automaticaly
+- same as check, plus automatic link repair for paths that match a cached git rename/copy (index vs HEAD)
 
-NOTE: markdown in root, .scripts, and .cursor directory is excluded 
+NOTE: markdown in root, .scripts, and .cursor directory is excluded

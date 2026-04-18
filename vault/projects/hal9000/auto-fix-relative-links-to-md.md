@@ -1,7 +1,3 @@
----
-id: 019d7a30-17ff-77f9-abb1-cd6eeac594d0
-references: []
----
 
 # Auto-fix relative Markdown links after renames (stretch)
 

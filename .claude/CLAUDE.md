@@ -1,1 +1,1 @@
-- **YAML front matter (`---` … `---`):** NEVER add, modify or remove frontmatter in markdown files.
+- **Vault markdown:** Do not introduce YAML front matter (`---` … `---`) or machine-maintained id/reference blocks. The vault uses repo-relative paths and links in note bodies only.

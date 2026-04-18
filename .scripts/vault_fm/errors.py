@@ -1,13 +1,13 @@
 class VaultFmError(Exception):
-    """Base error for vault front matter tooling."""
+    """Base error for vault tooling."""
 
 
 class ParseError(VaultFmError):
-    """Front matter or YAML subset parse failure."""
+    """Reserved for parse failures (e.g. legacy tooling)."""
 
 
 class ValidationError(VaultFmError):
-    """Contract violation (append-only, invalid UUID, etc.)."""
+    """Contract violation."""
 
 
 class EncodingError(VaultFmError):

@@ -1,7 +1,3 @@
----
-id: 019d9cda-67a4-70d1-bf18-a92c0e41a3d4
-references: []
----
 
 # LLM desktop server — power draw and rough electricity cost
 

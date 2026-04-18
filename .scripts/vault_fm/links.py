@@ -287,8 +287,8 @@ def validate_in_scope_notes(
     Validate relative links in note bodies for each path. Reads current working tree files.
     rel_paths should already be in-scope .md paths.
     """
-    from vault_fm.errors import EncodingError, ParseError
-    from vault_fm.io import read_file_utf8, split_front_matter
+    from vault_fm.errors import EncodingError
+    from vault_fm.io import read_file_utf8
 
     if tracked is None:
         tracked = list_tracked_files_set(repo_root)
@@ -297,16 +297,11 @@ def validate_in_scope_notes(
     for rel in rel_paths:
         path = repo_root / rel
         try:
-            text, raw = read_file_utf8(path)
-            sp = split_front_matter(text, raw)
-        except (EncodingError, ParseError) as e:
+            text, _raw = read_file_utf8(path)
+        except EncodingError as e:
             all_issues.append(f"{rel}: {e}")
             continue
-        if not sp.has_fm:
-            body = text
-        else:
-            body = sp.body_bytes.decode("utf-8")
-        all_issues.extend(validate_note_body_links(repo_root, rel, body, tracked))
+        all_issues.extend(validate_note_body_links(repo_root, rel, text, tracked))
     return all_issues
 
 

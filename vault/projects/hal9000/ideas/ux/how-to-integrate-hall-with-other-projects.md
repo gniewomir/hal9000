@@ -1,7 +1,3 @@
----
-id: 019d7c07-e66c-725b-a646-9b32ce84db30
-references: []
----
 
 # Idea 
 
