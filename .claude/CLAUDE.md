@@ -1,1 +1,0 @@
-- **Vault markdown:** Do not introduce YAML front matter (`---` … `---`) or machine-maintained id/reference blocks. The vault uses repo-relative paths and links in note bodies only.
