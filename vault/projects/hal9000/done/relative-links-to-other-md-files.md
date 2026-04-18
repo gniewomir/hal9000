@@ -18,7 +18,7 @@ Tools and authors historically used **per-file relative** Markdown links, e.g. `
 ### What to scan
 
 - **Sources:** Same **in-scope** path rules as the rest of `vault_fm` (`is_in_scope`)—same set as send/health for markdown bodies.
-- **Skip regions:** Do not treat link-like text inside **fenced code blocks** or **inline code** as links.
+- **Skip regions:** Link-like text inside **fenced code blocks** or **inline code** is not part of the link AST (same effect as “do not validate” for those regions). Details: [ast-based-markdown-parsing-for-links.md](vault/projects/hal9000/done/ast-based-markdown-parsing-for-links.md).
 - **HTML:** Do not validate `<a href="...">`; repository rules ask authors to use **`[text](url)`** only for navigation links in Markdown.
 
 ### Link syntax to validate
@@ -47,7 +47,7 @@ Tools and authors historically used **per-file relative** Markdown links, e.g. `
 ### Errors and exit code
 
 - **Collect all** broken links in one run, print them (source file, location, bad destination), then **exit non-zero** if any failures—one fix pass can clear the list.
-- Parser implementation can stay **stdlib-only** (no mandatory external Markdown parser): pragmatic extraction after skipping code regions, plus reference-definition handling, with tests grounded in real notes.
+- **Implementation:** link discovery uses a **Markdown AST** ([mistune](https://pypi.org/project/mistune/)) so behaviour aligns with a real parser; see [ast-based-markdown-parsing-for-links.md](vault/projects/hal9000/done/ast-based-markdown-parsing-for-links.md).
 
 ## Stretch (automatic repair after moves)
 
