@@ -1,7 +1,7 @@
 
 # LLM desktop server — power draw and rough electricity cost
 
-Companion to [`llm-server-on-desktop.md`](llm-server-on-desktop.md). This note records **order-of-magnitude** average power for the repurposed PC, converts it to **kWh/year**, and applies **variable energy (sprzedaż)** pricing from the attached Tauron tariff PDF. It is **not** a substitute for a watt-meter measurement or a full bill breakdown.
+Companion to [`llm-server-on-desktop.md`](vault/projects/llm-server/llm-server-on-desktop.md). This note records **order-of-magnitude** average power for the repurposed PC, converts it to **kWh/year**, and applies **variable energy (sprzedaż)** pricing from the attached Tauron tariff PDF. It is **not** a substitute for a watt-meter measurement or a full bill breakdown.
 
 ## Hardware (reference)
 
@@ -58,7 +58,7 @@ For a **constant** average power \(P\) (watts):
 
 ### Source
 
-Tariff document: [`taryfa-dla-energii-elektrycznej.PDF`](taryfa-dla-energii-elektrycznej.PDF) (TAURON Sprzedaż, grupy **G**, decyzja z 28.06.2024). The PDF states that **Tabela nr 1** (ceny maksymalne) applies when **lower** than **Tabela nr 2**.
+Tariff document: [`taryfa-dla-energii-elektrycznej.PDF`](vault/projects/llm-server/taryfa-dla-energii-elektrycznej.PDF) (TAURON Sprzedaż, grupy **G**, decyzja z 28.06.2024). The PDF states that **Tabela nr 1** (ceny maksymalne) applies when **lower** than **Tabela nr 2**.
 
 ### Rate used here (G11 — Dom Wygodny, całodobowa)
 
@@ -126,5 +126,5 @@ Monthly figures use \(\approx 730{,}5\) hours per month: \(\text{kWh/mo} \approx
 
 ## Related files
 
-- [`llm-server-on-desktop.md`](llm-server-on-desktop.md) — architecture, models, setup
-- [`taryfa-dla-energii-elektrycznej.PDF`](taryfa-dla-energii-elektrycznej.PDF) — tariff source for the **0,6212 zł/kWh** G11 comparison above
+- [`llm-server-on-desktop.md`](vault/projects/llm-server/llm-server-on-desktop.md) — architecture, models, setup
+- [`taryfa-dla-energii-elektrycznej.PDF`](vault/projects/llm-server/taryfa-dla-energii-elektrycznej.PDF) — tariff source for the **0,6212 zł/kWh** G11 comparison above

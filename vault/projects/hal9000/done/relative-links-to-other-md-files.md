@@ -3,14 +3,14 @@
 
 ## Problem
 
-Tools and authors add **relative** Markdown links to notes and assets, e.g. `[title](sibling.md)`, `[title](../folder/note.md)`, or `![fig](../assets/diagram.png)`. Those links are useful in editors and on GitHub. When files are **moved or renamed**, path-based links that still use the old location **break silently** until someone opens the target or runs a link checker.
+Tools and authors historically used **per-file relative** Markdown links, e.g. `[title](sibling.md)` or `[title](../folder/note.md)`. **Policy today:** in-repo links must spell the target as the **full path from the git repository root** (POSIX slashes) **without** a leading `/` (e.g. `vault/topics/a.md`, not `/vault/topics/a.md`), so the same string matches `git` paths and rename repair. Leading `/` is rejected to avoid hosts that interpret `/…` as site-absolute URLs.
 
 **Identity** for a note is its **repo-relative path**; the **graph** between notes is carried only by **links in the body**. Those links can still **drift after renames** unless validation (and optional rename-based repair) updates targets.
 
 ## Reasoning
 
 - Catching broken links **at send time** and in a **health** pass fails fast: bad changes do not land without an explicit fix.
-- Validation is **mechanical**: resolve each in-scope relative target from the source file (or repo root for leading `/`), normalize, and check policy (tracked file, correct casing, no symlink-as-target).
+- Validation is **mechanical**: normalize each in-scope filesystem target to a **repo-relative path** (no leading `/`, no `..` segments; not resolved from the source file’s directory), then check policy (tracked file, correct casing, no symlink-as-target).
 - Rename/copy detection (`index` vs `HEAD`) can **rewrite** link destinations to match moved files while preserving `#` / `?` suffixes; everything else stays a hard validation error until fixed manually.
 
 ## Specification (decisions)
@@ -29,9 +29,9 @@ Tools and authors add **relative** Markdown links to notes and assets, e.g. `[ti
 
 ### Destinations to check
 
-- **Include:** Scheme-free relative paths and repo-root paths **`/path/from/repo-root`** (resolve from **git repository root**).
+- **Include:** Scheme-free paths that name a file under the repository: the destination must be the **path from the git repository root** with **no** leading `/` (e.g. `vault/foo.md`). **Do not** use `../`, `./`, or bare sibling names; **do not** use a leading `/` (validator error).
 - **Exclude schemes** (do not validate as repo paths): e.g. `https:`, `mailto:`, `file:`, and other non-filesystem URL schemes.
-- **Normalization:** Strip **`#fragment`** and **`?query`** before existence checks. Apply **URI percent-decoding** on the path (e.g. `%20`), then normalize `.` / `..` and reject unsafe path behavior.
+- **Normalization:** Strip **`#fragment`** and **`?query`** before existence checks. Apply **URI percent-decoding** on the path (e.g. `%20`). Reject paths containing `..` after parsing.
 - **Targets:** Any **git-tracked file** (not only `.md`)—images and other assets count the same as notes.
 
 ### Valid target rule
@@ -42,7 +42,7 @@ Tools and authors add **relative** Markdown links to notes and assets, e.g. `[ti
 ### `send` and `health`
 
 - **`vault_fm send`:** When there is at least one **staged** in-scope `.md` file, runs **full-repo** link validation (and rename-based repair when needed) before the shell script commits. Validation uses the **current working tree** against **tracked** targets.
-- **`vault_fm health`:** Same validation rules over all in-scope tracked markdown (`--fix` enables the rename-repair loop).
+- **`vault_fm health`:** Same validation rules over all in-scope tracked markdown. **`--fix`** runs a repair loop: first **canonical** rewrites (relative or ``/``-prefixed targets → repo-root path without leading slash), then **rename** repairs from git index vs `HEAD`, then re-validates (bounded iterations).
 
 ### Errors and exit code
 
@@ -51,4 +51,4 @@ Tools and authors add **relative** Markdown links to notes and assets, e.g. `[ti
 
 ## Stretch (automatic repair after moves)
 
-See [auto-fix-relative-links-to-md.md](auto-fix-relative-links-to-md.md).
+See [auto-fix-relative-links-to-md.md](vault/projects/hal9000/done/auto-fix-relative-links-to-md.md).

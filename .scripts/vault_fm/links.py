@@ -192,10 +192,11 @@ def canonical_rel_link(source_rel: str, target_rel: str) -> str:
     return normalize_rel_path(rel.replace(os.sep, "/"))
 
 
-def logical_target_rel(source_rel: str, path_part: str) -> str | None:
+def legacy_logical_target_rel(source_rel: str, path_part: str) -> str | None:
     """
-    Normalize a link destination to a repo-relative path string (forward slashes),
-    without touching the filesystem (strict casing preserved from the link + normalization).
+    Resolve a link the pre-policy way: leading ``/`` is from repo root; otherwise resolve
+    from the source file's directory (supports ``..`` / ``./``).
+    Used only to discover the intended tracked path when migrating old spellings.
     """
     raw = path_part.replace("\\", "/").strip()
     if not raw:
@@ -220,6 +221,69 @@ def logical_target_rel(source_rel: str, path_part: str) -> str | None:
     return normalize_rel_path("/".join(parts))
 
 
+def resolve_link_for_canonical_fix(
+    source_rel: str, path_part: str, tracked: frozenset[str]
+) -> str | None:
+    """
+    Decide which repo-relative path a link points at for migration to canonical spelling.
+
+    Prefer :func:`logical_target_rel` when it matches a tracked file; if a bare filename
+    matches both repo-root and source-relative resolutions, prefer the relative (legacy)
+    target when both exist in ``tracked``.
+    """
+    legacy = legacy_logical_target_rel(source_rel, path_part)
+    if legacy is None:
+        return None
+    strict = logical_target_rel(source_rel, path_part)
+
+    if path_part.strip().startswith("/"):
+        return legacy if legacy in tracked else None
+
+    if strict is not None and strict in tracked:
+        if (
+            legacy != strict
+            and legacy in tracked
+            and "/" not in path_part.replace("\\", "/")
+        ):
+            return legacy
+        return strict
+
+    if legacy in tracked:
+        return legacy
+    return None
+
+
+def logical_target_rel(source_rel: str, path_part: str) -> str | None:
+    """
+    Normalize a link destination to a repo-relative path string (forward slashes).
+
+    In-repo links must spell the target as a path from the **git repository root**
+    **without** a leading slash (avoids site-absolute URLs in hosts that treat `/…`
+    as domain-root). Example: ``vault/topics/a.md``, not ``/vault/topics/a.md``.
+    ``..`` and ``./`` segments are not allowed; paths are not resolved from the
+    source file's directory.
+
+    ``source_rel`` is accepted for API compatibility but ignored for resolution.
+    """
+    _ = source_rel
+    raw = path_part.replace("\\", "/").strip()
+    if not raw:
+        return None
+    if raw.startswith("/"):
+        return None
+    p = PurePosixPath(raw)
+    parts: list[str] = []
+    for part in p.parts:
+        if part in ("", "."):
+            continue
+        if part == "..":
+            return None
+        parts.append(part)
+    if not parts:
+        return None
+    return normalize_rel_path("/".join(parts))
+
+
 def _check_one_path(
     repo_root: Path,
     source_rel: str,
@@ -232,9 +296,17 @@ def _check_one_path(
     path_part = _path_part_for_check(raw_dest)
     if not path_part:
         return None
+    if path_part.startswith("/"):
+        return (
+            "link target must not start with /; use repo-root path without "
+            f"leading slash: {raw_dest!r}"
+        )
     rel_str = logical_target_rel(source_rel, path_part)
     if rel_str is None:
-        return f"invalid path: {raw_dest!r}"
+        return (
+            "invalid repo-root path (path from git root, no .. or /.): "
+            f"{raw_dest!r}"
+        )
     if rel_str not in tracked:
         return f"broken link (not tracked or wrong casing): {raw_dest!r} -> {rel_str}"
     cand = repo_root.joinpath(*rel_str.split("/"))
@@ -284,7 +356,7 @@ def validate_in_scope_notes(
     tracked: frozenset[str] | None = None,
 ) -> list[str]:
     """
-    Validate relative links in note bodies for each path. Reads current working tree files.
+    Validate repo-root path links in note bodies for each path. Reads current working tree files.
     rel_paths should already be in-scope .md paths.
     """
     from vault_fm.errors import EncodingError

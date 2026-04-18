@@ -3,7 +3,7 @@
 
 ## Problem
 
-Even with [validation of relative links to other Markdown files](relative-links-to-other-md-files.md), every **rename or move** can leave many notes with outdated paths. Fixing them by hand is tedious and error-prone. A checker alone tells you what broke; it does not **rewrite** links to follow the new layout.
+Even with [validation of repo-root links to other Markdown files](vault/projects/hal9000/done/relative-links-to-other-md-files.md), every **rename or move** can leave many notes with outdated paths. Fixing them by hand is tedious and error-prone. A checker alone tells you what broke; it does not **rewrite** links to follow the new layout.
 
 ## Reasoning
 
@@ -13,10 +13,10 @@ Even with [validation of relative links to other Markdown files](relative-links-
 
 ## Proposed solution
 
-1. **Inputs:** Git change information for the current commit or working tree (e.g. `git diff --name-status`, rename pairs from index vs HEAD). Build a map **former relative path → current relative path** for moved/renamed `.md` files under the vault.
+1. **Inputs:** Git change information for the current commit or working tree (e.g. `git diff --name-status`, rename pairs from index vs HEAD). Build a map **former repo-relative path → current repo-relative path** for moved/renamed `.md` files under the vault.
 2. **Scan** notes (at least those that reference old paths or that are staged) for Markdown links whose targets match **keys** in that map or whose **basename** matches a unique new location.
 3. **Rewrite** link targets in the working tree (or as part of a `send` / `fix` pass) when exactly one **new** path is determined; skip or flag when **zero or many** candidates exist.
-4. **Re-run** relative-link existence validation; surface remaining failures for manual edit.
+4. **Re-run** link existence validation; surface remaining failures for manual edit.
 5. **Policy:** Never rewrite inside fenced code blocks if those are excluded from link parsing; respect the same URL rules as the validator.
 
 Optional later enhancement: resolve links via **note `id`** in the body (custom scheme or convention) so renames do not require rewrites—but that is a separate design from path-based auto-fix.

@@ -1,7 +1,7 @@
 
 # Automated setup (`setup-ollama-nginx-lan.sh`)
 
-The script [`setup-ollama-nginx-lan.sh`](setup-ollama-nginx-lan.sh) applies the same layout as [ollama-nginx-lan-setup.md](ollama-nginx-lan-setup.md): Ollama on `127.0.0.1:11434`, Nginx on a LAN-facing port with HTTP Basic auth, optional **ufw** allow rule. Read that document for the security model, HTTPS notes, and client usage.
+The script [`setup-ollama-nginx-lan.sh`](vault/projects/llm-server/implementation/setup-ollama-nginx-lan.sh) applies the same layout as [ollama-nginx-lan-setup.md](vault/projects/llm-server/implementation/ollama-nginx-lan-setup.md): Ollama on `127.0.0.1:11434`, Nginx on a LAN-facing port with HTTP Basic auth, optional **ufw** allow rule. Read that document for the security model, HTTPS notes, and client usage.
 
 ## Requirements
 
@@ -84,4 +84,4 @@ From another machine on the LAN, use the host’s IP or hostname instead of `127
 
 ## See also
 
-- [ollama-nginx-lan-setup.md](ollama-nginx-lan-setup.md) — full walkthrough, HTTPS, troubleshooting, and client notes.
+- [ollama-nginx-lan-setup.md](vault/projects/llm-server/implementation/ollama-nginx-lan-setup.md) — full walkthrough, HTTPS, troubleshooting, and client notes.

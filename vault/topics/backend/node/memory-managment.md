@@ -280,7 +280,7 @@ Then use DevTools:
 - **Heap snapshot** to find retained object graphs
 - **Allocation sampling** to find hot allocation sites
 
-For more detail on runtime measurement and RSS vs heap interpretation, see [Node.js: memory (heap, RSS) and runtime tracking](debuging/memory.md).
+For more detail on runtime measurement and RSS vs heap interpretation, see [Node.js: memory (heap, RSS) and runtime tracking](vault/topics/backend/node/debuging/memory.md).
 
 ## Rules of thumb
 

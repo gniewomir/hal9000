@@ -82,7 +82,7 @@ That model trades away **easy parallelism on one thread** for **cheap concurrenc
 - [Event loop timers and `process.nextTick`](https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick) — timers, `setImmediate`, `nextTick`, microtasks.
 - [Don’t Block the Event Loop](https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop) — blocking patterns and mitigations.
 - [libuv documentation](http://docs.libuv.org/en/latest/) — event loop, handles, thread pool.
-- [`vault/topics/node/file-handles.md`](file-handles.md) — FDs, libuv handles, and process lifetime.
-- [`vault/topics/node/events.md`](events.md) — `EventEmitter` patterns next to async code.
-- [`vault/topics/node/try-catch-finally-await.md`](try-catch-finally-await.md) — how errors and `await` interact across turns.
-- [`vault/topics/node/memory-managment.md`](memory-managment.md) — GC and retention with many concurrent operations.
+- [`vault/topics/backend/node/file-handles.md`](vault/topics/backend/node/file-handles.md) — FDs, libuv handles, and process lifetime.
+- [`vault/topics/backend/node/events.md`](vault/topics/backend/node/events.md) — `EventEmitter` patterns next to async code.
+- [`vault/topics/backend/node/try-catch-finally-await.md`](vault/topics/backend/node/try-catch-finally-await.md) — how errors and `await` interact across turns.
+- [`vault/topics/backend/node/memory-managment.md`](vault/topics/backend/node/memory-managment.md) — GC and retention with many concurrent operations.

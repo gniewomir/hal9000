@@ -1,7 +1,7 @@
 
 # Drop front matter — decisions (dead end for UUID + `references:`)
 
-Working goal: **remove all YAML front matter and all tooling that reads/writes it**, and treat the vault as **relative links only** for structure and automation.
+Working goal: **remove all YAML front matter and all tooling that reads/writes it**, and treat the vault as **links in the body only** (repo-root path targets per `vault_fm`) for structure and automation.
 
 ## What replaces FM semantics
 
@@ -25,12 +25,12 @@ Working goal: **remove all YAML front matter and all tooling that reads/writes i
 - **Source of truth for moves:** `git diff --cached --name-status -z -M` → **`R*` / `C*`** pairs (index vs `HEAD`).
 - **Scope:** Update links in **every tracked in-scope `.md`** whose resolved target equals the **old** path; then **`git add`** touched files so the tree is not half-fixed.
 - **Where it runs:** Both **`vault_fm send`** and **`vault_fm health --fix`** (shared loop, max **3** iterations).
-- **Output:** Emit **one canonical minimal** relative path from each source file to the new target (deterministic spelling).
+- **Output:** Emit the **canonical repo-relative** path to the new target (same spelling as `git`, no leading `/`).
 
 ## What to delete in phase 2 (inventory)
 
 - `.scripts/vault_fm` pieces that **split/compose FM**, **`id` / `references`**, send/health FM ensure and append-only rules.
-- **Cursor:** [`immutable-frontmatter`](../../../../.cursor/rules/immutable-frontmatter.mdc) rule and **`block-frontmatter`** hook — replace or remove so they match a no-FM vault.
+- **Cursor:** [`immutable-frontmatter`](.cursor/rules/immutable-frontmatter.mdc) rule and **`block-frontmatter`** hook — replace or remove so they match a no-FM vault.
 - **Docs** that describe the UUID + FM contract (update or mark superseded so FM is not reintroduced by habit).
 
 ## Non-goals / limits

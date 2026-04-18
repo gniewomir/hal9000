@@ -22,32 +22,26 @@ class TestSkipAndLogical(unittest.TestCase):
     def test_relative_not_skipped(self) -> None:
         self.assertFalse(_should_skip_destination("./x.png"))
 
-    def test_logical_relative(self) -> None:
+    def test_logical_repo_root_path(self) -> None:
         self.assertEqual(
-            logical_target_rel("topics/a/b.md", "c.md"),
-            "topics/a/c.md",
+            logical_target_rel("topics/a/b.md", "vault/topics/x.md"),
+            "vault/topics/x.md",
         )
 
-    def test_logical_up(self) -> None:
-        self.assertEqual(
-            logical_target_rel("topics/a/b.md", "../c.md"),
-            "topics/c.md",
-        )
+    def test_logical_rejects_parent_segments(self) -> None:
+        self.assertIsNone(logical_target_rel("topics/a/b.md", "../c.md"))
 
-    def test_logical_root_slash(self) -> None:
-        self.assertEqual(
-            logical_target_rel("topics/a/b.md", "/README.md"),
-            "README.md",
-        )
+    def test_logical_rejects_leading_slash(self) -> None:
+        self.assertIsNone(logical_target_rel("topics/a/b.md", "/README.md"))
 
 
 class TestFences(unittest.TestCase):
     def test_fence_hides_line(self) -> None:
-        body = "```\n[bad](missing.png)\n```\n\n[ok](topics/x.md)\n"
+        body = "```\n[bad](missing.png)\n```\n\n[ok](vault/topics/x.md)\n"
         lines = _iter_body_lines_outside_fences(body)
         joined = "\n".join(ln for _n, ln in lines)
         self.assertNotIn("missing", joined)
-        self.assertIn("[ok](topics/x.md)", joined)
+        self.assertIn("[ok](vault/topics/x.md)", joined)
 
 
 class TestValidateBody(unittest.TestCase):
@@ -56,7 +50,7 @@ class TestValidateBody(unittest.TestCase):
         issues = validate_note_body_links(
             Path("/repo"),
             "topics/a.md",
-            "see [x](nope.png)",
+            "see [x](vault/does-not-exist/nope.png)",
             tracked,
         )
         self.assertTrue(any("broken link" in x for x in issues))
@@ -68,7 +62,7 @@ class TestValidateBody(unittest.TestCase):
         issues = validate_note_body_links(
             root,
             rel,
-            "see [p](io.py)",
+            "see [p](.scripts/vault_fm/io.py)",
             tracked,
         )
         self.assertEqual(issues, [])
@@ -79,5 +73,5 @@ class TestCheckOnePath(unittest.TestCase):
         root = Path(__file__).resolve().parents[2]
         rel_self = ".scripts/vault_fm/test_links.py"
         tracked = frozenset({rel_self, ".scripts/vault_fm/io.py"})
-        err = _check_one_path(root, rel_self, "io.py", tracked)
+        err = _check_one_path(root, rel_self, ".scripts/vault_fm/io.py", tracked)
         self.assertIsNone(err)

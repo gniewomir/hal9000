@@ -1,7 +1,7 @@
 
 # Problem 
 
-I want to have one centralized location for publishing [look](./social-media-publishing-for-hal9000.md) 
+I want to have one centralized location for publishing [look](vault/projects/hal9000/ideas/publishing/social-media-publishing-for-hal9000.md) 
 
 Yet, the repository for my blog is separate entity. 
 

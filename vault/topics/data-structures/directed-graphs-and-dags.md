@@ -61,4 +61,4 @@ A vault of notes with links can be seen as a **directed graph** (note A links to
 
 ## See also
 
-- [Data Structures Reference](reference.md) — broader complexity and structure catalog for this topic area.
+- [Data Structures Reference](vault/topics/data-structures/reference.md) — broader complexity and structure catalog for this topic area.

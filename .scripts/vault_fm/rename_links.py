@@ -8,9 +8,9 @@ from vault_fm.io import read_file_utf8
 from vault_fm.links import (
     _path_part_for_check,
     _should_skip_destination,
-    canonical_rel_link,
     logical_target_rel,
     list_tracked_files_set,
+    resolve_link_for_canonical_fix,
     rewrite_note_body_links,
     split_path_and_suffix,
     validate_in_scope_notes,
@@ -20,8 +20,66 @@ from vault_fm.paths import normalize_rel_path
 MAX_REPAIR_ITERS = 3
 
 
+def _same_repo_path_spelling(path_part: str, canonical: str) -> bool:
+    """True if path_part already uses canonical repo-root spelling (no ``/``, no ``..``)."""
+    p = path_part.replace("\\", "/").strip()
+    if not p or p.startswith("/"):
+        return False
+    if ".." in p:
+        return False
+    if p.startswith("./"):
+        p = p[2:]
+    return normalize_rel_path(p) == canonical
+
+
+def _make_canonical_replace_dest(source_rel: str, tracked: frozenset[str]):
+    """Rewrite destinations to repo-root canonical form (no /, no ..) when resolvable."""
+
+    def replace_dest(raw: str) -> str | None:
+        if _should_skip_destination(raw):
+            return None
+        pp = _path_part_for_check(raw)
+        if not pp:
+            return None
+        resolved = resolve_link_for_canonical_fix(source_rel, pp, tracked)
+        if resolved is None:
+            return None
+        canonical = normalize_rel_path(resolved)
+        if _same_repo_path_spelling(pp, canonical):
+            return None
+        _, suffix = split_path_and_suffix(raw)
+        return canonical + suffix
+
+    return replace_dest
+
+
+def apply_canonical_link_repairs_to_vault(repo_root: Path) -> list[str]:
+    """
+    Rewrite links that still use relative or ``/``-prefixed spellings to repo-root paths
+    (no leading slash). Returns rel paths of files written.
+    """
+    paths = list_tracked_md(repo_root)
+    tracked = list_tracked_files_set(repo_root)
+    touched: list[str] = []
+    for rel in paths:
+        path = repo_root / rel
+        try:
+            text, raw = read_file_utf8(path)
+        except (EncodingError, OSError):
+            continue
+        replace_dest = _make_canonical_replace_dest(rel, tracked)
+        new_body = rewrite_note_body_links(rel, text, replace_dest)
+        if new_body is None:
+            continue
+        new_bytes = new_body.encode("utf-8")
+        if new_bytes != raw:
+            path.write_bytes(new_bytes)
+            touched.append(rel)
+    return touched
+
+
 def validate_tracked_links(repo_root: Path) -> list[str]:
-    """Validate relative links in all tracked in-scope markdown files."""
+    """Validate repo-root path links in all tracked in-scope markdown files."""
     paths = list_tracked_md(repo_root)
     tracked = list_tracked_files_set(repo_root)
     return validate_in_scope_notes(repo_root, paths, tracked=tracked)
@@ -44,7 +102,7 @@ def _make_replace_dest(
             return None
         new_target = rename[key]
         _, suffix = split_path_and_suffix(raw)
-        return canonical_rel_link(source_rel, new_target) + suffix
+        return normalize_rel_path(new_target) + suffix
 
     return replace_dest
 
@@ -82,14 +140,17 @@ def apply_rename_repairs_to_vault(repo_root: Path) -> list[str]:
 
 def run_link_validation_with_rename_repair(repo_root: Path) -> list[str]:
     """
-    Validate all tracked links; on failure, apply rename-based repairs (from index vs HEAD)
-    and re-validate up to MAX_REPAIR_ITERS times. Returns remaining issue lines.
+    Validate all tracked links; on failure, apply canonical link rewrites (relative or
+    ``/``-prefixed → repo-root path), then rename-based repairs (index vs HEAD), then
+    re-validate up to MAX_REPAIR_ITERS times. Returns remaining issue lines.
     """
     issues = validate_tracked_links(repo_root)
     if not issues:
         return []
     for _ in range(MAX_REPAIR_ITERS):
-        touched = apply_rename_repairs_to_vault(repo_root)
+        touched_canon = apply_canonical_link_repairs_to_vault(repo_root)
+        touched_rename = apply_rename_repairs_to_vault(repo_root)
+        touched = sorted(set(touched_canon + touched_rename))
         if not touched:
             return issues
         git_add(repo_root, touched)
