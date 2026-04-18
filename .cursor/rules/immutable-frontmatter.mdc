@@ -1,7 +1,0 @@
----
-description: Vault markdown has no YAML front matter
-globs: "**/*.md"
-alwaysApply: false
----
-
-Do not add YAML front matter (`---` … `---`) to markdown under the vault. Identity is the file path; relations are links in the body only.

@@ -25,7 +25,9 @@ Deliver a **single markdown document** (new or revised) with **exactly these top
 3. **Where it applies (examples)** — This section carries most of the **practical weight**. Give **several** concrete scenarios (aim for roughly **4–8** bullets unless the topic is extremely narrow) where the concept is the right tool. For each bullet, include **Context**, **What you actually do** (steps, options, or patterns — not just “use X”), **Why this concept**, and **Tradeoffs or when to pick something else**. Prefer realistic combinations (e.g. stack + constraint) over generic “web apps.”
 4. **Common gotchas (examples)** — Misunderstandings, edge cases, footguns, and how to recognize or avoid them. Prefer real patterns over generic warnings. Aim for **at least 3** gotchas when the topic allows; each should read like **symptom → likely cause → fix or verification step** with enough detail to reproduce or diagnose.
 5. **Related concepts** — Neighboring ideas worth exploring next: for each, **one or two sentences** (what it is and why it matters relative to the main topic). Prefer a small bullet list (roughly **5–9** items); optional short links if helpful. Keep these short, but list enough neighbors that the reader can **continue learning with a practical path** (what to learn next to ship or debug).
-6. **References** — Bulleted links: official docs, specs, authoritative articles, and **paths to relevant files in this repo**. **In-repo `.md` links must be relative to the document you are writing** (e.g. `../topics/node/event-loop.md`, `./related.md`) so they resolve in editors, git UIs, and static viewers. Do **not** use absolute filesystem paths (`/home/...`), `file://` URLs, or other machine-specific roots. Prefer stable URLs and paths the user can follow offline.
+6. **References** — Bulleted links: official docs, specs, authoritative articles, and **paths to relevant files in this repo**.
+
+   **In-repo link targets (this repository):** Use the **path from the git repository root**, **POSIX slashes**, **no leading `/`** — e.g. `vault/topics/node/event-loop.md`, `.scripts/vault_fm/links.py`. That matches `vault_fm` validation and rename repair (see [`vault/projects/hal9000/done/relative-links-to-other-md-files.md`](vault/projects/hal9000/done/relative-links-to-other-md-files.md)). **Do not** use per-file relative navigation between notes (`../sibling.md`, `./note.md`) or a **leading slash** (`/vault/...`) for in-repo targets. You may append `#fragment` or `?query` when needed. External URLs use normal `https://...` links. Do **not** use absolute filesystem paths (`/home/...`), `file://` URLs, or other machine-specific roots.
 
 Use `##` headings with those section titles (adjust parenthetical bits to match, but keep the six-part structure).
 
@@ -48,7 +50,7 @@ When the user points at existing markdown (paste, path, or open file):
 - **Practical applications first:** “Where it applies” and “Common gotchas” should together answer “**When do I reach for this? What do I do? What breaks?**” Default assumption: the reader wants to **use** the concept, not only recognize its name.
 - Related concepts must stay **short per item** (one–two sentences each); they are pointers, not mini explainers — but the **list** should be rich enough to suggest a learning path.
 - Gotchas must be **specific** (symptom → cause → fix or avoidance), not vague "be careful" advice.
-- References must include at least one **in-repo** link when the concept touches this codebase (search if needed). Links to other markdown files in the repo must be **relative paths** (see References section above).
+- References must include at least one **in-repo** link when the concept touches this codebase (search if needed). Links to other markdown or tracked files in this repo must use the **repo-root path form** (see References section above), not `../`-style paths between siblings.
 
 ## Document template
 
@@ -85,5 +87,5 @@ When the user points at existing markdown (paste, path, or open file):
 ## References
 
 - [Title](https://example.com) — …
-- [`../relative/path/to/other-topic.md`](../relative/path/to/other-topic.md) — … (in-repo `.md`: always relative to this file)
+- [Other topic](vault/topics/example/other-topic.md) — … (in-repo: **repo-root** path from git root, no leading `/`)
 ```
