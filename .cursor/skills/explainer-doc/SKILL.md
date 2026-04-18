@@ -1,10 +1,7 @@
 ---
 name: explainer-doc
 description: >-
-  Manual skill only — do not apply from context or topic alone. Produces or
-  restructures markdown explainer documents with layman summary, precise theory,
-  applicability examples, gotcha examples, and references. Use only when the
-  user explicitly invokes /explainer-doc, names explainer-doc, or asks for this
+  Manual skill only. Use only when the user explicitly invokes /explainer-doc, names explainer-doc, or asks for this
   exact section layout or explainer format.
 ---
 
@@ -25,9 +22,10 @@ Deliver a **single markdown document** (new or revised) with **exactly these top
 2. **Theory (precise)** — Formal or technical account: definitions, invariants, how it fits in a broader model, limits and assumptions. Use precise terminology here.
 3. **Where it applies (examples)** — Concrete scenarios where the concept is the right tool, with **why** it fits (criteria, tradeoffs).
 4. **Common gotchas (examples)** — Misunderstandings, edge cases, footguns, and how to recognize or avoid them. Prefer real patterns over generic warnings.
-5. **References** — Bulleted links: official docs, specs, authoritative articles, and **paths to relevant files in this repo** (use repo-relative paths like `vault/topics/...`). Prefer stable URLs and paths the user can follow offline.
+5. **Related concepts** — Neighboring ideas worth exploring next: for each, **one or two sentences** (what it is and why it matters relative to the main topic). Prefer a small bullet list (roughly 3–7 items); optional short links if helpful.
+6. **References** — Bulleted links: official docs, specs, authoritative articles, and **paths to relevant files in this repo** (use repo-relative paths like `vault/topics/...`). Prefer stable URLs and paths the user can follow offline.
 
-Use `##` headings with those section titles (adjust parenthetical bits to match, but keep the five-part structure).
+Use `##` headings with those section titles (adjust parenthetical bits to match, but keep the six-part structure).
 
 Optional: a single `#` title line at the top for the concept name. **Do not add YAML frontmatter** to generated or reworked files unless the user explicitly asks (this repo discourages unsolicited frontmatter changes).
 
@@ -36,7 +34,7 @@ Optional: a single `#` title line at the top for the concept name. **Do not add 
 When the user points at existing markdown (paste, path, or open file):
 
 1. Read the full source; preserve factual correctness and intent.
-2. Map content into the five sections; **move and rewrite** for clarity rather than duplicating rambling blocks.
+2. Map content into the six sections; **move and rewrite** for clarity rather than duplicating rambling blocks.
 3. If material is missing for a section, add a brief honest gap note *or* research from repo/docs (with references) — do not invent citations.
 4. Keep the user's examples if they are good; tighten wording; merge duplicates.
 5. If the original used a different heading hierarchy, normalize to this structure without losing information.
@@ -44,6 +42,7 @@ When the user points at existing markdown (paste, path, or open file):
 ## Quality bar
 
 - Layman section must stand alone for a quick read; theory section must satisfy someone who already knows adjacent concepts.
+- Related concepts must stay **short** (one–two sentences each); they are pointers, not mini explainers.
 - Gotchas must be **specific** (symptom → cause → fix or avoidance), not vague "be careful" advice.
 - References must include at least one **in-repo** link when the concept touches this codebase (search if needed).
 
@@ -69,6 +68,11 @@ When the user points at existing markdown (paste, path, or open file):
 
 - **Gotcha:** … **What goes wrong:** … **What to do instead:** …
 - …
+
+## Related concepts
+
+- **Concept A** — … (one or two sentences: what it is, why explore it next).
+- **Concept B** — …
 
 ## References
 
