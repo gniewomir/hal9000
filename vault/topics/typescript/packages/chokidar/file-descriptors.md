@@ -5,7 +5,7 @@ references: []
 
 # Chokidar and file descriptors
 
-Notes on **`EMFILE` / “too many open files”**, how **watching** relates to FDs and **kernel watch limits**, and **practical mitigations** with tradeoffs. For general Node FD lifecycle, see [Node.js: file descriptors and handles](../../../node/file-handles.md).
+Notes on **`EMFILE` / “too many open files”**, how **watching** relates to FDs and **kernel watch limits**, and **practical mitigations** with tradeoffs. For general Node FD lifecycle, see [Node.js: file descriptors and handles](../../../backend/node/file-handles.md).
 
 ---
 
@@ -93,7 +93,7 @@ Use **`lsof -p <pid>`** (or Activity Monitor / Instruments) and group by **type*
 
 ### 6. Fix leaks and cap concurrency
 
-- **Streams / `FileHandle` / raw `fd`**: ensure **`close()`** / **`destroy()`** on long-lived paths; see [file-handles.md](../../../node/file-handles.md).
+- **Streams / `FileHandle` / raw `fd`**: ensure **`close()`** / **`destroy()`** on long-lived paths; see [file-handles.md](../../../backend/node/file-handles.md).
 - **Parallel `readFile` / glob / copy**: many overlapping ops ⇒ many **short-lived** FDs at once—**throttle** or reduce parallelism.
 
 ### 7. Don’t rely on `mv` to free watchers

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from vault_fm.errors import EncodingError, ParseError
 from vault_fm.gitutil import git_repo_root, list_tracked_md
-from vault_fm.links import list_tracked_files_set, validate_in_scope_notes
+from vault_fm.rename_links import run_link_validation_with_rename_repair, validate_tracked_links
 from vault_fm.io import (
     compose_front_matter,
     default_fm_text,
@@ -186,11 +186,14 @@ def main(argv: list[str] | None = None) -> int:
     for line in issues:
         print(line)
 
-    paths = list_tracked_md(root)
-    tracked = list_tracked_files_set(root)
-    for line in validate_in_scope_notes(root, paths, tracked=tracked):
-        print(line)
-        issues.append(line)
+    if fix:
+        for line in run_link_validation_with_rename_repair(root):
+            print(line)
+            issues.append(line)
+    else:
+        for line in validate_tracked_links(root):
+            print(line)
+            issues.append(line)
 
     return 0 if not issues else 1
 

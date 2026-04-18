@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import re
+from collections.abc import Callable
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
 
@@ -169,6 +171,27 @@ def _path_part_for_check(raw_dest: str) -> str:
     return unquote(s).strip()
 
 
+def split_path_and_suffix(raw_dest: str) -> tuple[str, str]:
+    """
+    Split `path` from optional `?query` and/or `#fragment` suffix (first `?` or `#` wins).
+    Returns (path_only, suffix_including_first_sep) e.g. ("a.md", "?x#y").
+    """
+    s = raw_dest.strip()
+    positions = [i for i in (s.find("?"), s.find("#")) if i != -1]
+    if not positions:
+        return s, ""
+    cut = min(positions)
+    return s[:cut], s[cut:]
+
+
+def canonical_rel_link(source_rel: str, target_rel: str) -> str:
+    """Minimal relative path from source file's directory to target (repo-relative, POSIX)."""
+    src_dir = str(PurePosixPath(source_rel).parent)
+    tgt = str(PurePosixPath(target_rel))
+    rel = os.path.relpath(tgt, src_dir or ".")
+    return normalize_rel_path(rel.replace(os.sep, "/"))
+
+
 def logical_target_rel(source_rel: str, path_part: str) -> str | None:
     """
     Normalize a link destination to a repo-relative path string (forward slashes),
@@ -285,3 +308,91 @@ def validate_in_scope_notes(
             body = sp.body_bytes.decode("utf-8")
         all_issues.extend(validate_note_body_links(repo_root, rel, body, tracked))
     return all_issues
+
+
+def _rebuild_body_with_line_edits(body: str, modified: dict[int, str]) -> str:
+    """Apply per-line replacements; line numbers are 1-based over all body lines (incl. fences)."""
+    out: list[str] = []
+    in_fence = False
+    line_no = 0
+    for line in body.splitlines(keepends=True):
+        content = line.rstrip("\r\n")
+        line_no += 1
+        m = re.match(r"^ {0,3}(`{3,}|~{3,})", content)
+        if m:
+            in_fence = not in_fence
+            out.append(line)
+            continue
+        if in_fence:
+            out.append(line)
+            continue
+        if line_no in modified:
+            nl = line[len(content) :]
+            out.append(modified[line_no] + nl)
+        else:
+            out.append(line)
+    return "".join(out)
+
+
+def rewrite_note_body_links(
+    source_rel: str,
+    body: str,
+    replace_dest: Callable[[str], str | None],
+) -> str | None:
+    """
+    Walk the same structure as validate_note_body_links; replace destinations when
+    replace_dest returns a new string. Returns new body if any change, else None.
+    """
+    lines_outside = _iter_body_lines_outside_fences(body)
+    modified: dict[int, str] = {}
+
+    for line_no, line in lines_outside:
+        new_line = line
+        spans = _inline_code_spans(line)
+        replacements: list[tuple[int, int, str]] = []
+        i = 0
+        while True:
+            j = new_line.find("](", i)
+            if j == -1:
+                break
+            if _in_spans(j, spans) or _in_spans(j + 1, spans):
+                i = j + 2
+                continue
+            parsed = _parse_link_dest_parens(new_line, j + 1)
+            if parsed is None:
+                i = j + 2
+                continue
+            raw_dest, close_idx = parsed
+            dest_start = j + 2
+            rep = replace_dest(raw_dest)
+            if rep is not None and rep != raw_dest:
+                replacements.append((dest_start, close_idx, rep))
+            i = close_idx + 1
+
+        for start, end, rep in sorted(replacements, key=lambda t: -t[0]):
+            new_line = new_line[:start] + rep + new_line[end:]
+
+        m = _REF_DEF_RE.match(new_line.rstrip())
+        if m:
+            dest = (m.group(2) or m.group(3) or "").strip()
+            if dest:
+                rep = replace_dest(dest)
+                if rep is not None and rep != dest:
+                    if m.group(2) is not None:
+                        start = new_line.index("<", m.end(1))
+                        gt = new_line.find(">", start + 1)
+                        if gt != -1:
+                            new_line = new_line[: start + 1] + rep + new_line[gt:]
+                    else:
+                        g3 = m.group(3)
+                        if g3:
+                            pos = new_line.find(g3, m.start(0))
+                            if pos != -1:
+                                new_line = new_line[:pos] + rep + new_line[pos + len(g3) :]
+
+        if new_line != line:
+            modified[line_no] = new_line
+
+    if not modified:
+        return None
+    return _rebuild_body_with_line_edits(body, modified)

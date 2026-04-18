@@ -114,6 +114,52 @@ def git_show_index_text(repo_root: Path, rel_path: str) -> str | None:
     return cp.stdout.decode("utf-8")
 
 
+def list_cached_renames(repo_root: Path) -> list[tuple[str, str]]:
+    """
+    Rename/copy pairs (old_path, new_path) from the index vs HEAD.
+    Uses `git diff --cached --name-status -z -M` (NUL-separated records).
+    """
+    cp = _run_git(
+        repo_root,
+        "diff",
+        "--cached",
+        "--name-status",
+        "-z",
+        "-M",
+    )
+    if cp.returncode != 0:
+        raise RuntimeError(
+            f"git diff --cached --name-status -z failed: "
+            f"{cp.stderr.decode(errors='replace')!r}"
+        )
+    return _parse_name_status_z(cp.stdout)
+
+
+def _parse_name_status_z(data: bytes) -> list[tuple[str, str]]:
+    """Extract (old, new) pairs for R* and C* status lines."""
+    parts = [p for p in data.split(b"\0") if p]
+    out: list[tuple[str, str]] = []
+    i = 0
+    while i < len(parts):
+        status = parts[i].decode("utf-8", errors="replace")
+        i += 1
+        if _is_rename_or_copy_status(status):
+            if i + 1 >= len(parts):
+                break
+            old = normalize_rel_path(parts[i].decode("utf-8", errors="replace"))
+            new = normalize_rel_path(parts[i + 1].decode("utf-8", errors="replace"))
+            i += 2
+            out.append((old, new))
+        else:
+            if i < len(parts):
+                i += 1
+    return out
+
+
+def _is_rename_or_copy_status(status: str) -> bool:
+    return len(status) > 1 and status[0] in "RC" and status[1].isdigit()
+
+
 def git_add(repo_root: Path, paths: list[str]) -> None:
     if not paths:
         return
