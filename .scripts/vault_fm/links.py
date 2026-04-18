@@ -9,13 +9,10 @@ from urllib.parse import unquote
 
 from mistune import BlockState, Markdown, create_markdown
 from mistune.renderers.markdown import MarkdownRenderer
-from mistune.util import escape_url, unikey
+from mistune.util import escape_url
 
 from vault_fm.gitutil import list_tracked_files
 from vault_fm.paths import normalize_rel_path
-
-# Reference-style link use: [text][ref] or ![alt][ref]; second bracket may be empty (shortcut).
-_REF_USE_RE = re.compile(r"!?\[([^\]]*)\]\s*\[([^\]]*)\]")
 
 _mistune_ast: Markdown = create_markdown(renderer=None)
 
@@ -23,52 +20,6 @@ _mistune_ast: Markdown = create_markdown(renderer=None)
 def list_tracked_files_set(repo_root: Path) -> frozenset[str]:
     """Set of all git-tracked paths (forward slashes, relative to repo root)."""
     return frozenset(list_tracked_files(repo_root))
-
-
-def _inline_code_spans(line: str) -> list[tuple[int, int]]:
-    """Half-open [start, end) spans of inline code on this line (backtick runs)."""
-    spans: list[tuple[int, int]] = []
-    i = 0
-    n = len(line)
-    while i < n:
-        if line[i] != "`":
-            i += 1
-            continue
-        start = i
-        tick = 0
-        while i < n and line[i] == "`":
-            tick += 1
-            i += 1
-        close = line.find("`" * tick, i)
-        if close == -1:
-            spans.append((start, n))
-            break
-        end = close + tick
-        spans.append((start, end))
-        i = end
-    return spans
-
-
-def _in_spans(idx: int, spans: list[tuple[int, int]]) -> bool:
-    for a, b in spans:
-        if a <= idx < b:
-            return True
-    return False
-
-
-def _iter_body_lines_outside_fences(body: str) -> list[tuple[int, str]]:
-    """(1-based line number, line text) for lines not inside ``` / ~~~ fences."""
-    out: list[tuple[int, str]] = []
-    in_fence = False
-    for line_no, line in enumerate(body.splitlines(), start=1):
-        m = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
-        if m:
-            in_fence = not in_fence
-            continue
-        if in_fence:
-            continue
-        out.append((line_no, line))
-    return out
 
 
 def _parse_ast_and_state(body: str) -> tuple[list[dict[str, Any]], BlockState]:
@@ -133,33 +84,6 @@ def _apply_replace_dest_to_tokens(
                 data["url"] = new_url
                 changed = True
     return changed
-
-
-def _undefined_reference_issues(
-    source_rel: str, body: str, state: BlockState
-) -> list[str]:
-    """CommonMark leaves bad refs as text; report them using the same unikey rules as mistune."""
-    defined = state.env.get("ref_links")
-    if not isinstance(defined, dict):
-        defined = {}
-    issues: list[str] = []
-    for line_no, line in _iter_body_lines_outside_fences(body):
-        spans = _inline_code_spans(line)
-        for m in _REF_USE_RE.finditer(line):
-            if _in_spans(m.start(), spans) or _in_spans(m.end() - 1, spans):
-                continue
-            g1, g2 = m.group(1), m.group(2)
-            ref_label = (g2.strip() if g2.strip() else g1.strip())
-            if not ref_label:
-                continue
-            key = unikey(ref_label)
-            if key in defined:
-                continue
-            col = m.start() + 1
-            issues.append(
-                f"{source_rel}:{line_no}:{col}: undefined link reference [{ref_label}]"
-            )
-    return issues
 
 
 def _should_skip_destination(raw: str) -> bool:
@@ -337,8 +261,7 @@ def validate_note_body_links(
 ) -> list[str]:
     """Return human-readable issue lines for one note body."""
     issues: list[str] = []
-    ast, state = _parse_ast_and_state(body)
-    issues.extend(_undefined_reference_issues(source_rel, body, state))
+    ast, _ = _parse_ast_and_state(body)
 
     for tok in _iter_all_tokens(ast):
         if tok.get("type") not in _LINK_LIKE:

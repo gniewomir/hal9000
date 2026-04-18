@@ -16,7 +16,7 @@ Link **discovery** for validation and rewrite now goes through **[mistune](https
 ## Behaviour notes
 
 - **Fenced code and inline code** are not scanned as links by construction (they are `block_code` / `codespan` nodes, not link text), so the old hand-rolled fence scanner is no longer the source of truth for “what is a link.”
-- **Undefined reference links** (`[text][missing]` with no `[missing]: …` definition) do not produce a link node under CommonMark; mistune leaves them as plain text. The tooling still reports **undefined reference** issues with a small supplementary line pass so behaviour stays visible to authors.
+- **Undefined reference links** (`[text][missing]` with no `[missing]: …` definition) do not produce a link node under CommonMark; mistune leaves them as plain text. The tooling does **not** report those separately; only resolved **`link`** / **`image`** destinations and reference-definition URLs are checked.
 - **Rewrite path:** after mutating URLs on tokens and in **`ref_links`**, bodies are serialized with mistune’s **`MarkdownRenderer`**. That can **reformat** whitespace and where reference-definition lines appear; semantics and link targets should match policy, but diffs may be noisier than the old in-place string edits.
 
 ## Dependency

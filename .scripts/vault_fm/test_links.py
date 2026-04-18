@@ -5,7 +5,6 @@ from pathlib import Path
 
 from vault_fm.links import (
     _check_one_path,
-    _iter_body_lines_outside_fences,
     _should_skip_destination,
     logical_target_rel,
     validate_note_body_links,
@@ -36,12 +35,16 @@ class TestSkipAndLogical(unittest.TestCase):
 
 
 class TestFences(unittest.TestCase):
-    def test_fence_hides_line(self) -> None:
-        body = "```\n[bad](missing.png)\n```\n\n[ok](vault/topics/x.md)\n"
-        lines = _iter_body_lines_outside_fences(body)
-        joined = "\n".join(ln for _n, ln in lines)
-        self.assertNotIn("missing", joined)
-        self.assertIn("[ok](vault/topics/x.md)", joined)
+    def test_fence_does_not_emit_link_tokens(self) -> None:
+        """Broken markdown inside a fenced block is block_code, not validated as links."""
+        tracked = frozenset({"topics/a.md"})
+        issues = validate_note_body_links(
+            Path("/repo"),
+            "topics/a.md",
+            "```\n[x](vault/does-not-exist.md)\n```\n",
+            tracked,
+        )
+        self.assertEqual(issues, [])
 
 
 class TestValidateBody(unittest.TestCase):
