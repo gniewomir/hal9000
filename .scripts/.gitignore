@@ -1,3 +1,4 @@
-__pycache__
-.venv
-_mistune_vendor
+**/*/__pycache__
+**/*/.venv
+**/*/_mistune_vendor
+**/*/.idea

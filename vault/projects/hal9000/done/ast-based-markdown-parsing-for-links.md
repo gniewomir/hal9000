@@ -11,6 +11,12 @@ That approach duplicated parts of a real Markdown grammar (nested emphasis, edge
 
 Link **discovery** for validation and rewrite now goes through **[mistune](https://pypi.org/project/mistune/)** in AST mode: parse the full body, walk **`link`** and **`image`** tokens, read destinations from each token’s **`attrs["url"]`**, and use the parser’s **`BlockState`** (notably **`env["ref_links"]`**) for reference-definition URLs.
 
+### Contract (only mechanism)
+
+- **No** regex or line-based scan of the Markdown source to find links or destinations.
+- **Yes** mistune **`parse`** → depth-first walk of tokens → URLs from **`link`** / **`image`** and from **`ref_links`** for rewrites; validation uses the same token walk for in-repo checks.
+- Path policy (repo-root rules, tracked files, symlinks) runs on URL strings **after** they are taken from the AST.
+
 **Unchanged:** repo-root path rules, tracked-file checks, symlink rejection, and the higher-level repair loops in [`rename_links.py`](.scripts/vault_fm/rename_links.py) / send / health. Those still call into [`links.py`](.scripts/vault_fm/links.py); only how destinations are **found** and **rewritten** moved to the AST pipeline.
 
 ## Behaviour notes

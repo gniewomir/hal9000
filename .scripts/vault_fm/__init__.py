@@ -1,4 +1,4 @@
-"""Vault markdown link validation and rename repair (requires mistune)."""
+"""Vault markdown link validation and rename repair (mistune AST parse + walk; requires mistune)."""
 
 __all__ = ["__version__"]
 

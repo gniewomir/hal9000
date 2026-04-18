@@ -1,5 +1,20 @@
 from __future__ import annotations
 
+"""Link validation and rewrite for vault Markdown bodies.
+
+**Discovery:** Link destinations are taken *only* from mistune’s structured parse of the
+full document—depth-first walk of ``link`` and ``image`` tokens (``attrs["url"]``) plus
+``BlockState.env["ref_links"]`` for reference-definition URLs. The source text is not
+scanned with regexes or line parsers to find links.
+
+**Policy:** :func:`_should_skip_destination`, :func:`logical_target_rel`, and related
+helpers classify or resolve strings *after* they are taken from the AST; they do not
+participate in discovery.
+
+**Rewrite:** Mutate those same token fields and ``ref_links`` entries, then serialize
+with :class:`mistune.renderers.markdown.MarkdownRenderer`.
+"""
+
 import os
 import re
 from collections.abc import Callable, Iterable
@@ -14,6 +29,7 @@ from mistune.util import escape_url
 from vault_fm.gitutil import list_tracked_files
 from vault_fm.paths import normalize_rel_path
 
+# No HTML renderer: ``parse`` returns block AST tokens + ``BlockState`` for walking.
 _mistune_ast: Markdown = create_markdown(renderer=None)
 
 
@@ -39,6 +55,13 @@ def _iter_all_tokens(tokens: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any
 _LINK_LIKE = frozenset({"link", "image"})
 
 
+def _iter_link_image_tokens(tokens: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
+    """Every ``link`` / ``image`` in the AST (inline + block plugin use same types)."""
+    for tok in _iter_all_tokens(tokens):
+        if tok.get("type") in _LINK_LIKE:
+            yield tok
+
+
 def _token_url_raw(token: dict[str, Any]) -> str | None:
     attrs = token.get("attrs")
     if not isinstance(attrs, dict):
@@ -54,9 +77,7 @@ def _apply_replace_dest_to_tokens(
 ) -> bool:
     """Mutate link/image attrs and ref_links urls in place. Returns True if anything changed."""
     changed = False
-    for tok in _iter_all_tokens(tokens):
-        if tok.get("type") not in _LINK_LIKE:
-            continue
+    for tok in _iter_link_image_tokens(tokens):
         raw = _token_url_raw(tok)
         if raw is None:
             continue
@@ -87,6 +108,7 @@ def _apply_replace_dest_to_tokens(
 
 
 def _should_skip_destination(raw: str) -> bool:
+    """True if ``raw`` is not an in-repo path check (fragment-only, ``http:``, etc.)."""
     s = raw.strip()
     if not s or s.startswith("#"):
         return True
@@ -259,13 +281,11 @@ def validate_note_body_links(
     body: str,
     tracked: frozenset[str],
 ) -> list[str]:
-    """Return human-readable issue lines for one note body."""
+    """Return human-readable issue lines for one note body (AST link/image URLs only)."""
     issues: list[str] = []
     ast, _ = _parse_ast_and_state(body)
 
-    for tok in _iter_all_tokens(ast):
-        if tok.get("type") not in _LINK_LIKE:
-            continue
+    for tok in _iter_link_image_tokens(ast):
         raw = _token_url_raw(tok)
         if raw is None:
             continue
