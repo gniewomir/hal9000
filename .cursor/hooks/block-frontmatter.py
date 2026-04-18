@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""preToolUse: deny agent tools that add, change, or remove YAML frontmatter in *.md files."""
+"""preToolUse: deny agent tools that add, change, or remove YAML frontmatter in vault *.md files."""
 
 from __future__ import annotations
 
@@ -26,6 +26,34 @@ def resolve_path(path_str: str, payload: dict) -> str:
     roots = payload.get("workspace_roots") or []
     base = payload.get("cwd") or (roots[0] if roots else os.getcwd())
     return os.path.normpath(os.path.join(base, path_str))
+
+
+def vault_directory_candidates(payload: dict) -> list[str]:
+    """Absolute paths to each workspace's `vault/` directory."""
+    roots = payload.get("workspace_roots") or []
+    if not roots:
+        base = payload.get("cwd")
+        if isinstance(base, str) and base:
+            roots = [base]
+        else:
+            roots = [os.getcwd()]
+    out: list[str] = []
+    for r in roots:
+        if isinstance(r, str) and r:
+            out.append(os.path.normpath(os.path.join(r, "vault")))
+    return out
+
+
+def is_under_vault(abs_path: str, payload: dict) -> bool:
+    """True if abs_path is inside a workspace `vault/` tree (not sibling names like `vault-extra`)."""
+    norm = os.path.normpath(abs_path)
+    for vd in vault_directory_candidates(payload):
+        if norm == vd:
+            return True
+        prefix = vd + os.sep
+        if norm.startswith(prefix):
+            return True
+    return False
 
 
 def read_file(path: str) -> str | None:
@@ -103,6 +131,10 @@ def main() -> None:
             return
 
         abs_path = resolve_path(path, payload)
+
+        if not is_under_vault(abs_path, payload):
+            allow()
+            return
 
         if tool == "Write":
             new_text = tool_contents(tool_input)
