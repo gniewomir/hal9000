@@ -30,7 +30,7 @@ Working goal: **remove all YAML front matter and all tooling that reads/writes i
 ## What to delete in phase 2 (inventory)
 
 - `.scripts/vault_fm` pieces that **split/compose FM**, **`id` / `references`**, send/health FM ensure and append-only rules.
-- **Cursor:** [`immutable-frontmatter`](.cursor/rules/immutable-frontmatter.mdc) rule and **`block-frontmatter`** hook — replace or remove so they match a no-FM vault.
+- **Cursor:** `immutable-frontmatter` rule and **`block-frontmatter`** hook — replace or remove so they match a no-FM vault.
 - **Docs** that describe the UUID + FM contract (update or mark superseded so FM is not reintroduced by habit).
 
 ## Non-goals / limits
