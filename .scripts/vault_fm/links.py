@@ -2,19 +2,22 @@ from __future__ import annotations
 
 import os
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from pathlib import Path, PurePosixPath
+from typing import Any
 from urllib.parse import unquote
+
+from mistune import BlockState, Markdown, create_markdown
+from mistune.renderers.markdown import MarkdownRenderer
+from mistune.util import escape_url, unikey
 
 from vault_fm.gitutil import list_tracked_files
 from vault_fm.paths import normalize_rel_path
 
-# Link reference definition: up to 3 spaces, [id]: dest with optional <> and trailing title.
-_REF_DEF_RE = re.compile(
-    r"^ {0,3}\[([^\]]+)\]:\s*(?:<([^>\n]*)>|(\S+))(?:\s+[\"'(\[].*)?$"
-)
 # Reference-style link use: [text][ref] or ![alt][ref]; second bracket may be empty (shortcut).
 _REF_USE_RE = re.compile(r"!?\[([^\]]*)\]\s*\[([^\]]*)\]")
+
+_mistune_ast: Markdown = create_markdown(renderer=None)
 
 
 def list_tracked_files_set(repo_root: Path) -> frozenset[str]:
@@ -68,86 +71,95 @@ def _iter_body_lines_outside_fences(body: str) -> list[tuple[int, str]]:
     return out
 
 
-def _parse_ref_definitions(lines: list[tuple[int, str]]) -> dict[str, str]:
-    """Map lowercased reference label -> raw destination string."""
-    defs: dict[str, str] = {}
-    for _line_no, line in lines:
-        m = _REF_DEF_RE.match(line.rstrip())
-        if not m:
-            continue
-        label = m.group(1).strip().lower()
-        dest = (m.group(2) or m.group(3) or "").strip()
-        if dest:
-            defs[label] = dest
-    return defs
+def _parse_ast_and_state(body: str) -> tuple[list[dict[str, Any]], BlockState]:
+    """Parse markdown to block-level AST and parser state (ref_links, etc.)."""
+    return _mistune_ast.parse(body)
 
 
-def _parse_link_dest_parens(line: str, open_paren_idx: int) -> tuple[str, int] | None:
-    """open_paren_idx points at `(` in `](`. Returns (dest, index of closing `)`."""
-    dest_start = open_paren_idx + 1
-    if dest_start >= len(line):
+def _iter_all_tokens(tokens: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
+    stack = list(reversed(list(tokens)))
+    while stack:
+        t = stack.pop()
+        yield t
+        for c in reversed(t.get("children") or ()):
+            stack.append(c)
+
+
+_LINK_LIKE = frozenset({"link", "image"})
+
+
+def _token_url_raw(token: dict[str, Any]) -> str | None:
+    attrs = token.get("attrs")
+    if not isinstance(attrs, dict):
         return None
-    if line[dest_start] == "<":
-        gt = line.find(">", dest_start + 1)
-        if gt == -1:
-            return None
-        dest = line[dest_start + 1 : gt]
-        if gt + 1 >= len(line) or line[gt + 1] != ")":
-            return None
-        return dest, gt + 1
-    depth = 0
-    p = dest_start
-    while p < len(line):
-        c = line[p]
-        if c == "(":
-            depth += 1
-        elif c == ")":
-            if depth == 0:
-                return line[dest_start:p], p
-            depth -= 1
-        p += 1
-    return None
+    u = attrs.get("url")
+    return u if isinstance(u, str) else None
 
 
-def _parse_inline_link_dests(
-    line: str, code_spans: list[tuple[int, int]]
-) -> list[tuple[int, str]]:
-    """(1-based column of destination start, raw dest) for `](dest)` on this line."""
-    results: list[tuple[int, str]] = []
-    i = 0
-    while True:
-        j = line.find("](", i)
-        if j == -1:
-            break
-        if _in_spans(j, code_spans) or _in_spans(j + 1, code_spans):
-            i = j + 2
+def _apply_replace_dest_to_tokens(
+    tokens: list[dict[str, Any]],
+    state: BlockState,
+    replace_dest: Callable[[str], str | None],
+) -> bool:
+    """Mutate link/image attrs and ref_links urls in place. Returns True if anything changed."""
+    changed = False
+    for tok in _iter_all_tokens(tokens):
+        if tok.get("type") not in _LINK_LIKE:
             continue
-        parsed = _parse_link_dest_parens(line, j + 1)
-        if parsed is None:
-            i = j + 2
+        raw = _token_url_raw(tok)
+        if raw is None:
             continue
-        dest, close_idx = parsed
-        dest_start = j + 2
-        col = dest_start + 1
-        results.append((col, dest))
-        i = close_idx + 1
-    return results
+        rep = replace_dest(raw)
+        if rep is None:
+            continue
+        new_url = escape_url(rep)
+        if new_url != raw:
+            tok.setdefault("attrs", {})["url"] = new_url
+            changed = True
+
+    ref_links = state.env.get("ref_links")
+    if isinstance(ref_links, dict):
+        for _k, data in ref_links.items():
+            if not isinstance(data, dict):
+                continue
+            raw = data.get("url")
+            if not isinstance(raw, str):
+                continue
+            rep = replace_dest(raw)
+            if rep is None:
+                continue
+            new_url = escape_url(rep)
+            if new_url != raw:
+                data["url"] = new_url
+                changed = True
+    return changed
 
 
-def _parse_ref_uses(
-    line: str, code_spans: list[tuple[int, int]]
-) -> list[tuple[int, str]]:
-    """(1-based column of match start, raw url from definition lookup done outside)."""
-    out: list[tuple[int, str]] = []
-    for m in _REF_USE_RE.finditer(line):
-        if _in_spans(m.start(), code_spans) or _in_spans(m.end() - 1, code_spans):
-            continue
-        g1, g2 = m.group(1), m.group(2)
-        ref_key = (g2.strip() if g2.strip() else g1.strip()).lower()
-        if not ref_key:
-            continue
-        out.append((m.start() + 1, ref_key))
-    return out
+def _undefined_reference_issues(
+    source_rel: str, body: str, state: BlockState
+) -> list[str]:
+    """CommonMark leaves bad refs as text; report them using the same unikey rules as mistune."""
+    defined = state.env.get("ref_links")
+    if not isinstance(defined, dict):
+        defined = {}
+    issues: list[str] = []
+    for line_no, line in _iter_body_lines_outside_fences(body):
+        spans = _inline_code_spans(line)
+        for m in _REF_USE_RE.finditer(line):
+            if _in_spans(m.start(), spans) or _in_spans(m.end() - 1, spans):
+                continue
+            g1, g2 = m.group(1), m.group(2)
+            ref_label = (g2.strip() if g2.strip() else g1.strip())
+            if not ref_label:
+                continue
+            key = unikey(ref_label)
+            if key in defined:
+                continue
+            col = m.start() + 1
+            issues.append(
+                f"{source_rel}:{line_no}:{col}: undefined link reference [{ref_label}]"
+            )
+    return issues
 
 
 def _should_skip_destination(raw: str) -> bool:
@@ -325,27 +337,21 @@ def validate_note_body_links(
 ) -> list[str]:
     """Return human-readable issue lines for one note body."""
     issues: list[str] = []
-    lines = _iter_body_lines_outside_fences(body)
-    ref_defs = _parse_ref_definitions(lines)
+    ast, state = _parse_ast_and_state(body)
+    issues.extend(_undefined_reference_issues(source_rel, body, state))
 
-    for line_no, line in lines:
-        spans = _inline_code_spans(line)
-
-        for col, raw_dest in _parse_inline_link_dests(line, spans):
-            err = _check_one_path(repo_root, source_rel, raw_dest, tracked)
-            if err:
-                issues.append(f"{source_rel}:{line_no}:{col}: {err}")
-
-        for col, ref_key in _parse_ref_uses(line, spans):
-            raw_dest = ref_defs.get(ref_key)
-            if raw_dest is None:
-                issues.append(
-                    f"{source_rel}:{line_no}:{col}: undefined link reference [{ref_key}]"
-                )
-                continue
-            err = _check_one_path(repo_root, source_rel, raw_dest, tracked)
-            if err:
-                issues.append(f"{source_rel}:{line_no}:{col}: {err}")
+    for tok in _iter_all_tokens(ast):
+        if tok.get("type") not in _LINK_LIKE:
+            continue
+        raw = _token_url_raw(tok)
+        if raw is None:
+            continue
+        lineno = tok.get("lineno")
+        col = tok.get("col") or 1
+        line_no = int(lineno) if isinstance(lineno, int) else 1
+        err = _check_one_path(repo_root, source_rel, raw, tracked)
+        if err:
+            issues.append(f"{source_rel}:{line_no}:{col}: {err}")
 
     return issues
 
@@ -377,89 +383,20 @@ def validate_in_scope_notes(
     return all_issues
 
 
-def _rebuild_body_with_line_edits(body: str, modified: dict[int, str]) -> str:
-    """Apply per-line replacements; line numbers are 1-based over all body lines (incl. fences)."""
-    out: list[str] = []
-    in_fence = False
-    line_no = 0
-    for line in body.splitlines(keepends=True):
-        content = line.rstrip("\r\n")
-        line_no += 1
-        m = re.match(r"^ {0,3}(`{3,}|~{3,})", content)
-        if m:
-            in_fence = not in_fence
-            out.append(line)
-            continue
-        if in_fence:
-            out.append(line)
-            continue
-        if line_no in modified:
-            nl = line[len(content) :]
-            out.append(modified[line_no] + nl)
-        else:
-            out.append(line)
-    return "".join(out)
-
-
 def rewrite_note_body_links(
     source_rel: str,
     body: str,
     replace_dest: Callable[[str], str | None],
 ) -> str | None:
     """
-    Walk the same structure as validate_note_body_links; replace destinations when
-    replace_dest returns a new string. Returns new body if any change, else None.
+    Parse with mistune, apply ``replace_dest`` to link/image and reference-definition URLs,
+    then serialize with :class:`MarkdownRenderer`. Returns new body if any replacement, else None.
     """
-    lines_outside = _iter_body_lines_outside_fences(body)
-    modified: dict[int, str] = {}
-
-    for line_no, line in lines_outside:
-        new_line = line
-        spans = _inline_code_spans(line)
-        replacements: list[tuple[int, int, str]] = []
-        i = 0
-        while True:
-            j = new_line.find("](", i)
-            if j == -1:
-                break
-            if _in_spans(j, spans) or _in_spans(j + 1, spans):
-                i = j + 2
-                continue
-            parsed = _parse_link_dest_parens(new_line, j + 1)
-            if parsed is None:
-                i = j + 2
-                continue
-            raw_dest, close_idx = parsed
-            dest_start = j + 2
-            rep = replace_dest(raw_dest)
-            if rep is not None and rep != raw_dest:
-                replacements.append((dest_start, close_idx, rep))
-            i = close_idx + 1
-
-        for start, end, rep in sorted(replacements, key=lambda t: -t[0]):
-            new_line = new_line[:start] + rep + new_line[end:]
-
-        m = _REF_DEF_RE.match(new_line.rstrip())
-        if m:
-            dest = (m.group(2) or m.group(3) or "").strip()
-            if dest:
-                rep = replace_dest(dest)
-                if rep is not None and rep != dest:
-                    if m.group(2) is not None:
-                        start = new_line.index("<", m.end(1))
-                        gt = new_line.find(">", start + 1)
-                        if gt != -1:
-                            new_line = new_line[: start + 1] + rep + new_line[gt:]
-                    else:
-                        g3 = m.group(3)
-                        if g3:
-                            pos = new_line.find(g3, m.start(0))
-                            if pos != -1:
-                                new_line = new_line[:pos] + rep + new_line[pos + len(g3) :]
-
-        if new_line != line:
-            modified[line_no] = new_line
-
-    if not modified:
+    _ = source_rel
+    ast, state = _parse_ast_and_state(body)
+    if not _apply_replace_dest_to_tokens(ast, state, replace_dest):
         return None
-    return _rebuild_body_with_line_edits(body, modified)
+    out = MarkdownRenderer()(ast, state)
+    if out == body:
+        return None
+    return out

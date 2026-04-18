@@ -13,7 +13,30 @@ External storage for tech related things not always fitting in my head
 
 ## Vault tooling
 
-Requires **Python 3.14+** or higher to be available
+Requires **Python 3.14+** or higher to be available.
+
+### Python dependencies
+
+Link validation and repair (`vault_fm`) use **[mistune](https://pypi.org/project/mistune/)** for parsing markdown. Install it into the environment you use for `send.sh` / `check.sh` / `fix.sh` (the repo prefers a local venv at `.scripts/.venv`):
+
+```bash
+# From the repository root (create the venv once if it does not exist)
+python3.14 -m venv .scripts/.venv
+.scripts/.venv/bin/pip install -r .scripts/requirements.txt
+```
+
+Pinned packages are listed in [`.scripts/requirements.txt`](.scripts/requirements.txt) ([`vault_fm/requirements.txt`](.scripts/vault_fm/requirements.txt) includes that file for compatibility).
+
+**If `python3.14 -m venv .scripts/.venv` fails** with an error about `ensurepip` (common when the OS Python package does not ship `venv`/`ensurepip` support):
+
+- On Debian/Ubuntu, install the matching venv package (name varies), e.g. `python3.14-venv`, then retry the commands above; **or**
+- Create the venv without pip and install pip with [get-pip.py](https://bootstrap.pypa.io/get-pip.py):
+
+```bash
+python3.14 -m venv .scripts/.venv --without-pip
+curl -sS https://bootstrap.pypa.io/get-pip.py | .scripts/.venv/bin/python
+.scripts/.venv/bin/pip install -r .scripts/requirements.txt
+```
 
 - Priority #0: Don't ask me things - do the right thing by default
 - Priority #1: Let me know if something is wrong only if you cannot fix it

@@ -1,0 +1,2 @@
+# Canonical dependency pins live one level up (single source of truth).
+-r ../requirements.txt

@@ -1,4 +1,4 @@
-"""Vault markdown link validation and rename repair (stdlib only)."""
+"""Vault markdown link validation and rename repair (requires mistune)."""
 
 __all__ = ["__version__"]
 

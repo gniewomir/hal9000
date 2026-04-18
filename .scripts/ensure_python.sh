@@ -23,7 +23,7 @@ elif command -v python3 >/dev/null 2>&1 && _vault_fm_ok "$(command -v python3)";
 else
   ver="$(python3 -c 'import sys; print(".".join(str(x) for x in sys.version_info[:3]))' 2>/dev/null || echo unknown)"
   echo "vault_fm requires Python 3.14+ (stdlib uuid.uuid7). This interpreter is ${ver}." >&2
-  echo "Install python3.14 or create .scripts/.venv: python3.14 -m venv .scripts/.venv --without-pip" >&2
+  echo "Install python3.14 or create .scripts/.venv (with pip), then: .scripts/.venv/bin/pip install -r .scripts/requirements.txt" >&2
   exit 2
 fi
 
