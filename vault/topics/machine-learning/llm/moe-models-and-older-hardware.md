@@ -80,6 +80,6 @@ On **older hardware** (e.g. a few CPU cores, **8 GB VRAM**, **16–32 GB system 
 
 - [Parameters in Large Language Models](vault/topics/machine-learning/llm/parameters.md) — in-repo note on **parameter count**, **MoE example (Mixtral 8×7B)**, and **memory** tables.
 
-- [Repurpose gaming desktop as local LLM server](vault/projects/llm-server/llm-server-on-desktop.md) — **8 GB VRAM** constraints, **Ollama** workflow, model picks, **MoE** example (`deepseek-coder-v2:lite`) and partial-offload reality.
+- [Repurpose gaming desktop as local LLM server](vault/projects/llm-server/done/llm-server-on-desktop.md) — **8 GB VRAM** constraints, **Ollama** workflow, model picks, **MoE** example (`deepseek-coder-v2:lite`) and partial-offload reality.
 
 - [Relative links to other md files](vault/projects/hal9000/done/relative-links-to-other-md-files.md) — how this vault expects **in-repo** markdown links.

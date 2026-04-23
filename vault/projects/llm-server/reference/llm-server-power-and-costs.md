@@ -1,7 +1,6 @@
-
 # LLM desktop server — power draw and rough electricity cost
 
-Companion to [`llm-server-on-desktop.md`](vault/projects/llm-server/llm-server-on-desktop.md). This note records **order-of-magnitude** average power for the repurposed PC, converts it to **kWh/year**, and applies **variable energy (sprzedaż)** pricing from the attached Tauron tariff PDF. It is **not** a substitute for a watt-meter measurement or a full bill breakdown.
+Companion to [`llm-server-on-desktop.md`](vault/projects/llm-server/done/llm-server-on-desktop.md). This note records **order-of-magnitude** average power for the repurposed PC, converts it to **kWh/year**, and applies **variable energy (sprzedaż)** pricing from the attached Tauron tariff PDF. It is **not** a substitute for a watt-meter measurement or a full bill breakdown.
 
 ## Hardware (reference)
 
@@ -16,7 +15,7 @@ Companion to [`llm-server-on-desktop.md`](vault/projects/llm-server/llm-server-o
 
 All power figures below are **at the wall** (AC), not DC component sums.
 
----
+***
 
 ## Scenario definitions
 
@@ -26,7 +25,7 @@ All power figures below are **at the wall** (AC), not DC component sums.
 | **B — Moderate, GPU sometimes** | Regular background load; embeddings bursts, occasional chat; GPU active only part of the time. **Average** power depends heavily on **duty cycle**. |
 | **C — Moderate, LLM on GPU most of the time** | Steady inference / warm serving; GPU dominates average draw. |
 
----
+***
 
 ## Estimated average power (at the wall)
 
@@ -40,25 +39,25 @@ Rough **W** bands for continuous operation:
 
 **Sanity check:** These align with the ballpark already noted in `llm-server-on-desktop.md` (~80–100 W idle-ish, ~200–250 W under sustained GPU inference), expressed here as **ranges** and **scenarios**.
 
----
+***
 
 ## Energy per year
 
-For a **constant** average power \(P\) (watts):
+For a **constant** average power (P) (watts):
 
-\[
+[
 \text{kWh/year} \approx \frac{P}{1000} \times 8760
-\]
+]
 
 **Quick scale:** 100 W average ≈ **876 kWh/year**; 200 W ≈ **1752 kWh/year**.
 
----
+***
 
 ## Electricity cost (variable energy only — Tauron Sprzedaż)
 
 ### Source
 
-Tariff document: [`taryfa-dla-energii-elektrycznej.PDF`](vault/projects/llm-server/taryfa-dla-energii-elektrycznej.PDF) (TAURON Sprzedaż, grupy **G**, decyzja z 28.06.2024). The PDF states that **Tabela nr 1** (ceny maksymalne) applies when **lower** than **Tabela nr 2**.
+Tariff document: [`taryfa-dla-energii-elektrycznej.PDF`](vault/projects/llm-server/reference/taryfa-dla-energii-elektrycznej.PDF) (TAURON Sprzedaż, grupy **G**, decyzja z 28.06.2024). The PDF states that **Tabela nr 1** (ceny maksymalne) applies when **lower** than **Tabela nr 2**.
 
 ### Rate used here (G11 — Dom Wygodny, całodobowa)
 
@@ -75,11 +74,11 @@ For **G11**, comparing **brutto** values from those tables:
 
 ### Formula
 
-\[
+[
 \text{zł/year (energy only)} \approx \text{kWh/year} \times 0{,}6212
-\]
+]
 
-Rule of thumb for **G11** at this rate: **~5,44 zł per year per watt** of *average* continuous draw (\(8760 \times 0{,}6212 / 1000\)).
+Rule of thumb for **G11** at this rate: **~5,44 zł per year per watt** of *average* continuous draw ((8760 \times 0{,}6212 / 1000)).
 
 ### Rough cost table (G11 @ 0,6212 zł/kWh, energy only)
 
@@ -96,9 +95,9 @@ Illustrative **mid-range** and **endpoints** within the power bands above:
 | C LLM on GPU most of the time | 230 W | ~2015 | ~1252 | ~104 |
 | C LLM on GPU most of the time | 260 W | ~2278 | ~1415 | ~118 |
 
-Monthly figures use \(\approx 730{,}5\) hours per month: \(\text{kWh/mo} \approx P_\text{kW} \times 730{,}5\).
+Monthly figures use (\approx 730{,}5) hours per month: (\text{kWh/mo} \approx P_\text{kW} \times 730{,}5).
 
----
+***
 
 ## Caveats (read before trusting the zł)
 
@@ -122,9 +121,9 @@ Monthly figures use \(\approx 730{,}5\) hours per month: \(\text{kWh/mo} \approx
 
 10. **Currency and date.** All monetary amounts are **PLN**; tariff components are tied to **regulatory** documents and **dates** in the PDF — **re-check** before long-term budgeting.
 
----
+***
 
 ## Related files
 
-- [`llm-server-on-desktop.md`](vault/projects/llm-server/llm-server-on-desktop.md) — architecture, models, setup
-- [`taryfa-dla-energii-elektrycznej.PDF`](vault/projects/llm-server/taryfa-dla-energii-elektrycznej.PDF) — tariff source for the **0,6212 zł/kWh** G11 comparison above
+- [`llm-server-on-desktop.md`](vault/projects/llm-server/done/llm-server-on-desktop.md) — architecture, models, setup
+- [`taryfa-dla-energii-elektrycznej.PDF`](vault/projects/llm-server/reference/taryfa-dla-energii-elektrycznej.PDF) — tariff source for the **0,6212 zł/kWh** G11 comparison above
